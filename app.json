@@ -1,0 +1,21 @@
+{
+    "id": "com.yahoo.weather",
+    "version": "1.0.0",
+    "compatibility": "0.x || 1.x",
+    "category": "internet",
+    "name": {
+        "en": "Yahoo Weather",
+        "nl": "Yahoo Weer"
+    },
+    "description": {
+        "en": "Weather information from Yahoo",
+        "nl": "Weer informatie van Yahoo"
+    },
+    "author": {
+        "name": "Athom B.V.",
+        "email": "info@athom.nl"
+    },
+    "permissions": [
+        "homey:manager:geolocation"
+    ]
+}
