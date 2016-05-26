@@ -1,42 +1,79 @@
-"use strict";
-var request = require('request');
-var geocoder = require('node-geocoder')('teleport', 'https');
+'use strict';
 
-// Celsius or Fahrenheit
-var DEG = 'c';
+const YahooWeather = require('./node-yahoo-weather');
 
-var self = module.exports = {
+module.exports = {
 
-	init: function () {
+	init: function init() {
+		let latitude;
+		let longitude;
 
 		// Ask Homey for current location
-		Homey.manager('geolocation').getLocation(function (err, location) {
-
-			// Get lat and lon
-			var lat = location.latitude;
-			var lon = location.longitude;
-
-			// Create weather query for yahoo
-			var wsql = 'select * from weather.forecast where woeid=WID and u="' + DEG + '"',
-				weatherYQL = 'http://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(wsql) + '&format=json';
-
-			// Reverse encode lat lon to address information
-			geocoder.reverse({lat: lat, lon: lon})
-					.then(function (res) {
-
-						// Make request to retrieve woeid of location
-						request("http://where.yahooapis.com/v1/places.q('" + res[0].city + "')?format=json&appid=" + Homey.env.CLIENT_ID, function (err, response) {
-
-							// Make request to fetch weather information from yahoo
-							request(weatherYQL.replace('WID', JSON.parse(response.body).places.place[0].woeid), function (err, response) {
-								console.log(JSON.parse(response.body).query.results.channel);
-							});
-						})
-					})
-					.catch(function (err) {
-						console.log(err);
-					});
-
+		Homey.manager('geolocation').getLocation((err, location) => {
+			latitude = location.latitude;
+			longitude = location.longitude;
 		});
-	}
+
+		// Listen on speech input
+		Homey.manager('speech-input').on('speech', (speech, callback) => {
+			console.log(speech);
+			const options = {
+				weather: false,
+				date: 'today',
+				location: undefined,
+			};
+
+			speech.triggers.forEach(trigger => {
+				switch (trigger.id) {
+					case 'weather':
+						options.weather = true;
+						break;
+					case 'today':
+						options.date = 'today';
+						break;
+					case 'tomorrow':
+						options.date = 'tomorrow';
+						break;
+					default:
+						break;
+				}
+			});
+
+			processSpeechRequest(options);
+		});
+
+		function processSpeechRequest(options) {
+
+			// Create yahoo weather api instance
+			const yahooAPI = new YahooWeather({
+				temp_metric: 'c',
+				latitude: latitude,
+				longitude: longitude
+			}).fetchData().then((data) => {
+				const forecasts = data.channel.item.forecast;
+				console.log(options);
+				if (options.weather && options.date === 'today') {
+					const weather = yahooAPI.getConditionMetadata(forecasts[1].code).text.singular;
+					const response = `Today it will be ${weather}`;
+					console.log(response);
+					// Let Homey say response
+					say(response);
+				}
+				if (options.weather && options.date === 'tomorrow') {
+
+					var weather = yahooAPI.getConditionMetadata(forecasts[1].code).text.singular;
+					var response = `Tomorrow it will be ${weather}`;
+					console.log(response);
+					// Let Homey say response
+					say(response);
+				}
+
+			});
+
+		}
+
+		function say(text) {
+			Homey.manager('speech-output').say(text);
+		}
+	},
 };
