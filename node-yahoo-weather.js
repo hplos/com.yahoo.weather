@@ -2,6 +2,14 @@
 
 const request = require('request-promise');
 const geocoder = require('node-geocoder')('teleport', 'https');
+const GoogleMapsAPI = require('googlemaps');
+
+const googleMapsAPI = new GoogleMapsAPI({
+	key: Homey.env.GOOGLE_API_KEY,
+	stagger_time: 1000,
+	encode_polylines: false,
+	secure: true
+});
 
 class YahooWeather {
 
@@ -29,9 +37,20 @@ class YahooWeather {
 	}
 
 	_reverseGeoLocation(lat, lon) {
-
-		// Reverse encode lat lon to address information
-		return geocoder.reverse({lat: lat, lon: lon});
+		return new Promise(function(resolve, reject){
+			googleMapsAPI.reverseGeocode({
+				"latlng": `${lat},${lon}`,
+				"result_type": "locality",
+				"language": "en",
+				"location_type": "APPROXIMATE"
+			}, function (err, data) {
+				if(!err && data && data.results.length > 0){
+					resolve(data.results[0].address_components[0].long_name)
+				} else {
+					reject()
+				}
+			});
+		});
 	}
 
 	_convertCityToWoeid(city) {
@@ -53,7 +72,7 @@ class YahooWeather {
 				.then((res) => {
 
 					// Store city name
-					this.city = res[0].city;
+					this.city = res;
 
 					// Covert city name to woeid
 					this._convertCityToWoeid(this.city)
@@ -88,6 +107,8 @@ class YahooWeather {
 	}
 
 	getConditionMetadata(code) {
+		console.log(code);
+		// Get metadata belonging to weather code
 		return yahooConditions[(code === '3200') ? 48 : code]
 	}
 
@@ -360,6 +381,15 @@ const yahooConditions = [
 	},
 	{
 		'index': 24,
+		'type': 'wind',
+		'quantity': undefined,
+		'text': {
+			'singular': 'windy',
+			'plural': undefined,
+		},
+	},
+	{
+		'index': 25,
 		'type': 'cold',
 		'quantity': undefined,
 		'text': {

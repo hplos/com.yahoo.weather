@@ -31,44 +31,6 @@
           "weer"
         ]
       }
-    },
-    {
-      "id": "today",
-      "importance": 0.3,
-      "triggers": {
-        "en": [
-          "today"
-        ],
-        "nl": [
-          "vandaag"
-        ]
-      }
-    },
-    {
-      "id": "tomorrow",
-      "importance": 0.3,
-      "triggers": {
-        "en": [
-          "tomorrow"
-        ],
-        "nl": [
-          "morgen"
-        ]
-      }
-    },
-    {
-      "id": "day_after_tomorrow",
-      "importance": 0.3,
-      "triggers": {
-        "en": [
-          "day after tomorrow",
-          "today after tomorrow"
-        ],
-        "nl": [
-          "overmorgen",
-          "de dag na morgen"
-        ]
-      }
     }
   ]
 }
