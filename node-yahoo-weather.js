@@ -18,10 +18,10 @@ class YahooWeather {
 		this.temp_metric = options.temp_metric;
 		this.latitude = options.latitude;
 		this.longitude = options.longitude;
+		this.location = options.location;
 
 		// These will be retrieved
 		this.woeid = undefined;
-		this.city = undefined;
 
 		// Retrieve city name and woeid
 		this._getWoeid();
@@ -53,10 +53,10 @@ class YahooWeather {
 		});
 	}
 
-	_convertCityToWoeid(city) {
+	_convertLocationToWoeid(location) {
 
 		// Make request to retrieve woeid of location
-		return request(`http://where.yahooapis.com/v1/places.q('${city}')?format=json&appid=${Homey.env.YAHOO_CLIENT_ID}`);
+		return request(`http://where.yahooapis.com/v1/places.q('${location}')?format=json&appid=${Homey.env.YAHOO_CLIENT_ID}`);
 	}
 
 	_getWoeid() {
@@ -67,36 +67,59 @@ class YahooWeather {
 		// Fetch woeid and return promise
 		return new Promise((resolve, reject) => {
 
-			// First reverse lat long to a city name
-			this._reverseGeoLocation(this.latitude, this.longitude)
-				.then((res) => {
+			// Check if lat long are provided
+			if (this.latitude && this.longitude) {
 
-					// Store city name
-					this.city = res;
+				// First reverse lat long to a location name
+				this._reverseGeoLocation(this.latitude, this.longitude)
+					.then((res) => {
 
-					// Covert city name to woeid
-					this._convertCityToWoeid(this.city)
-						.then((res) => {
+						// Store location name
+						this.location = res;
 
-							// Store woeid
-							this.woeid = JSON.parse(res).places.place[0].woeid;
+						// Covert location name to woeid
+						this._convertLocationToWoeid(this.location)
+							.then((res) => {
 
-							// Resolve promise
-							resolve(this.woeid);
-						})
-						.catch((err) => {
-							console.error(`Error converting city to woeid: ${err}`);
+								// Store woeid
+								this.woeid = JSON.parse(res).places.place[0].woeid;
 
-							// Failed
-							reject(err);
-						});
-				})
-				.catch((err) => {
-					console.error(`Error reversing geo location: ${err}`);
+								// Resolve promise
+								resolve(this.woeid);
+							})
+							.catch((err) => {
+								console.error(`Error converting location to woeid: ${err}`);
 
-					// Failed
-					reject(err);
-				});
+								// Failed
+								reject(err);
+							});
+					})
+					.catch((err) => {
+						console.error(`Error reversing geo location: ${err}`);
+
+						// Failed
+						reject(err);
+					});
+			}
+			else if (this.location) { // Get woeid from provided location
+
+				// Covert location name to woeid
+				this._convertLocationToWoeid(this.location)
+					.then((res) => {
+
+						// Store woeid
+						this.woeid = JSON.parse(res).places.place[0].woeid;
+
+						// Resolve promise
+						resolve(this.woeid);
+					})
+					.catch((err) => {
+						console.error(`Error converting location to woeid: ${err}`);
+
+						// Failed
+						reject(new Error("converting location to woeid"));
+					});
+			}
 		});
 	}
 
@@ -107,7 +130,7 @@ class YahooWeather {
 	}
 
 	getConditionMetadata(code) {
-		console.log(code);
+
 		// Get metadata belonging to weather code
 		return yahooConditions[(code === '3200') ? 48 : code]
 	}
@@ -133,10 +156,10 @@ class YahooWeather {
 								.then((data) => {
 
 									// Resolve with data
-									resolve(JSON.parse(data).query.results);
+									resolve(this._parseData(data));
 								})
 								.catch((err) => {
-
+									
 									// Reject
 									reject(err);
 								});
@@ -144,7 +167,7 @@ class YahooWeather {
 						else {
 
 							// Resolve with data
-							resolve(JSON.parse(data).query.results);
+							resolve(this._parseData(data));
 						}
 					})
 					.catch((err) => {
@@ -159,6 +182,49 @@ class YahooWeather {
 					reject(err);
 				});
 		});
+	}
+
+	_parseData(data) {
+		let parsedData = JSON.parse(data).query.results;
+		
+		// If no data found throw error
+		if(!parsedData) throw Error("no data");
+		
+		let forecasts = parsedData.channel.item.forecast;
+
+		// Loop over all forecasts
+		for (let x in forecasts) {
+
+			// Retrieve metadata
+			const metadata = this.getConditionMetadata(forecasts[x].code);
+
+			// Merge the objects
+			for (let y in metadata) {
+				forecasts[x][y] = metadata[y];
+			}
+		}
+
+		// Construct current object
+		let current = {
+			wind: parsedData.channel.wind,
+			atmosphere: parsedData.channel.atmosphere,
+			astronomy: parsedData.channel.astronomy,
+			code: parsedData.channel.item.condition.code,
+			temperature: parsedData.channel.item.condition.temp
+		};
+
+		// Get metadata for current
+		const metadata = this.getConditionMetadata(current.code);
+
+		// Merge the objects
+		for (let y in metadata) {
+			current[y] = metadata[y];
+		}
+		
+		return {
+			current: current,
+			forecasts: forecasts
+		}
 	}
 }
 

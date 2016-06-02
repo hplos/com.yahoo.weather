@@ -1,6 +1,6 @@
 {
   "id": "com.yahoo.weather",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "compatibility": ">=0.8.30",
   "category": "internet",
   "name": {
@@ -96,7 +96,20 @@
           "huidige",
           "momenteel",
           "actueel",
-          "acutele"
+          "acutele",
+          "nu"
+        ]
+      }
+    },
+    {
+      "id": "in",
+      "importance": 0.3,
+      "triggers": {
+        "en": [
+          "in"
+        ],
+        "nl": [
+          "in"
         ]
       }
     }
