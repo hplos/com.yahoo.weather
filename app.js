@@ -5,8 +5,8 @@ const moment = require('moment');
 
 module.exports.init = function init() {
 
-	// Start listening for incoming speech events
-	listenForSpeechEvents(new Promise(function (resolve, reject) {
+	// Create location promise
+	let locationPromise = new Promise(function (resolve, reject) {
 
 		// Ask Homey for current location
 		Homey.manager('geolocation').getLocation((err, location) => {
@@ -15,8 +15,135 @@ module.exports.init = function init() {
 			if (err) reject(err);
 			else resolve({latitude: location.latitude, longitude: location.longitude});
 		});
-	}));
+	});
+
+	// Listen for changes in weather on current location
+	listenForWeatherChanges(locationPromise);
+
+	// Start listening for incoming speech events
+	listenForSpeechEvents(locationPromise);
 };
+
+/**
+ * Listen for weather changes and trigger flows
+ * when detected.
+ * @param locationPromise
+ */
+function listenForWeatherChanges(locationPromise) {
+
+	// Wait for location data to be fetched
+	Promise.all([locationPromise]).then(function (data) {
+		var location = data[0];
+
+		// Create yahoo weather api instance
+		const yahooAPI = new YahooWeather({
+			temp_metric: 'c',
+			latitude: location.latitude,
+			longitude: location.longitude,
+			polling: true
+		});
+
+		// Listen for weather changes
+		yahooAPI.on("wind_chill", value => {
+
+			// Trigger wind chill flow(degrees)
+			Homey.manager('flow').trigger('wind_chill', {
+				wind_chill: parseFloat(value)
+			});
+
+		}).on("wind_direction", value => {
+
+			// Trigger wind direction flow (degrees)
+			Homey.manager('flow').trigger('wind_direction', {
+				wind_direction: parseFloat(value)
+			});
+
+		}).on("wind_speed", value => {
+
+			// Trigger wind speed flow (kph)
+			Homey.manager('flow').trigger('wind_speed', {
+				wind_speed: parseFloat(value)
+			});
+
+		}).on("atmosphere_humidity", value => {
+
+			// Trigger atmosphere humidity flow (mb)
+			Homey.manager('flow').trigger('atmosphere_humidity', {
+				atmosphere_humidity: parseFloat(value)
+			});
+
+		}).on("atmosphere_pressure", value => {
+
+			// Trigger atmosphere pressure flow (percentage)
+			Homey.manager('flow').trigger('atmosphere_pressure', {
+				atmosphere_pressure: parseFloat(value)
+			});
+
+		}).on("atmosphere_rising", value => { //TODO in app.json
+
+			// Trigger atmosphere rising flow (steady (0), rising (1), or falling (2))
+			Homey.manager('flow').trigger('atmosphere_rising', {
+				atmosphere_rising: parseFloat(value)
+			});
+
+		}).on("atmosphere_visibility", value => {
+
+			// Trigger atmosphere visibility flow (km)
+			Homey.manager('flow').trigger('atmosphere_visibility', {
+				atmosphere_visibility: parseFloat(value)
+			});
+
+		}).on("astronomy_sunrise", value => {
+
+			// Trigger atmosphere sunrise flow (hour)
+			Homey.manager('flow').trigger('astronomy_sunrise', {
+				astronomy_sunrise: moment(value, ["h:mm A"]).format("HH:mm")
+			});
+
+		}).on("astronomy_sunset", value => {
+
+			// Trigger atmosphere sunset flow (hour)
+			Homey.manager('flow').trigger('astronomy_sunset', {
+				astronomy_sunset: moment(value, ["h:mm A"]).format("HH:mm")
+			});
+
+		}).on("temperature", value => {
+
+			// Trigger temperature flow (degrees Celsius)
+			Homey.manager('flow').trigger('temperature', {
+				temperature: parseFloat(value)
+			});
+
+		}).on("weatherType", value => { //TODO in app.json
+			
+			// Trigger weatherType flow (string)
+			Homey.manager('flow').trigger('weatherType', {
+				type: value
+			});
+		});
+
+		// When triggered, get latest structure data and check if status is home or not
+		Homey.manager('flow').on('condition.atmosphere_rising', function (callback, args) {
+
+			// Check for proper incoming arguments
+			if (args != null && args.status) {
+				yahooAPI.get("atmosphere_rising", function (err, result) {
+
+					// Parse result
+					let status = "steady";
+					if(parseInt(result) === 0) status == "steady";
+					else if(parseInt(result) === 1) status == "rising";
+					else if(parseInt(result) === 2) status == "falling";
+
+					// Callback result
+					callback(err, (status == args.status));
+				})
+			} else {
+				callback(true, false);
+			}
+		});
+	})
+}
 
 /**
  * Start listening for incoming speech events

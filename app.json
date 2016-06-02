@@ -11,6 +11,10 @@
     "en": "Weather information from Yahoo",
     "nl": "Weer informatie van Yahoo"
   },
+  "images": {
+    "large": "assets/images/large.jpg",
+    "small": "assets/images/small.jpg"
+  },
   "author": {
     "name": "Athom B.V.",
     "email": "info@athom.nl"
@@ -19,6 +23,192 @@
     "homey:manager:geolocation",
     "homey:manager:speech-output"
   ],
+  "flow": {
+    "triggers": [
+      {
+        "id": "wind_chill",
+        "title": {
+          "en": "Wind chill changed",
+          "nl": "Gevoelstemperatuur is veranderd"
+        },
+        "tokens": [
+          {
+            "name": "degrees",
+            "title": {
+              "en": "degrees",
+              "nl": "graden"
+            }
+          }
+        ]
+      },
+      {
+        "id": "wind_direction",
+        "title": {
+          "en": "Wind direction changed",
+          "nl": "Windrichting is veranderd"
+        },
+        "tokens": [
+          {
+            "name": "degrees",
+            "title": {
+              "en": "degrees",
+              "nl": "graden"
+            }
+          }
+        ]
+      },
+      {
+        "id": "wind_speed",
+        "title": {
+          "en": "Wind speed changed",
+          "nl": "Windsnelheid is veranderd"
+        },
+        "tokens": [
+          {
+            "name": "kph",
+            "title": {
+              "en": "kph",
+              "nl": "km/u"
+            }
+          }
+        ]
+      },
+      {
+        "id": "atmosphere_humidity",
+        "title": {
+          "en": "Atmosphere humidity changed",
+          "nl": "Luchtvochtigheid is veranderd"
+        },
+        "tokens": [
+          {
+            "name": "percent",
+            "title": {
+              "en": "percent",
+              "nl": "percentage"
+            }
+          }
+        ]
+      },
+      {
+        "id": "atmosphere_pressure",
+        "title": {
+          "en": "Atmosphere pressure changed",
+          "nl": "Luchtvochtigheid is veranderd"
+        },
+        "tokens": [
+          {
+            "name": "mb",
+            "title": {
+              "en": "millibar",
+              "nl": "millibar"
+            }
+          }
+        ]
+      },
+      {
+        "id": "atmosphere_visibility",
+        "title": {
+          "en": "Atmosphere visibility changed",
+          "nl": "Zichtbaarheid is veranderd"
+        },
+        "tokens": [
+          {
+            "name": "km",
+            "title": {
+              "en": "kilometres",
+              "nl": "kilometers"
+            }
+          }
+        ]
+      },
+      {
+        "id": "astronomy_sunrise",
+        "title": {
+          "en": "Sunrise time changed",
+          "nl": "Zonsopgang moment is veranderd"
+        },
+        "tokens": [
+          {
+            "name": "time",
+            "title": {
+              "en": "time",
+              "nl": "tijd"
+            }
+          }
+        ]
+      },
+      {
+        "id": "astronomy_sunset",
+        "title": {
+          "en": "Sunset time changed",
+          "nl": "Zonsondergang moment is veranderd"
+        },
+        "tokens": [
+          {
+            "name": "time",
+            "title": {
+              "en": "time",
+              "nl": "tijd"
+            }
+          }
+        ]
+      },
+      {
+        "id": "temperature",
+        "title": {
+          "en": "Temperature changed",
+          "nl": "Temperatuur is veranderd"
+        },
+        "tokens": [
+          {
+            "name": "temperature",
+            "title": {
+              "en": "temp",
+              "nl": "temp"
+            }
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "id": "atmosphere_rising",
+        "title": {
+          "en": "Barometric pressure !{{is|is not}}",
+          "nl": "Barometrische druk !{{is|is niet}}"
+        },
+        "args": [
+          {
+            "name": "status",
+            "type": "dropdown",
+            "values": [
+              {
+                "id": "steady",
+                "label": {
+                  "en": "Steady",
+                  "nl": "Constant"
+                }
+              },
+              {
+                "id": "falling",
+                "label": {
+                  "en": "Falling",
+                  "nl": "Dalende"
+                }
+              },
+              {
+                "id": "rising",
+                "label": {
+                  "en": "Rising",
+                  "nl": "Oplopend"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
   "speech": [
     {
       "id": "weather",

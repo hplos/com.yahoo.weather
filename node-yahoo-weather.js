@@ -2,6 +2,7 @@
 
 const request = require('request-promise');
 const GoogleMapsAPI = require('googlemaps');
+const EventEmitter = require('events');
 
 const googleMapsAPI = new GoogleMapsAPI({
 	key: Homey.env.GOOGLE_API_KEY,
@@ -10,9 +11,10 @@ const googleMapsAPI = new GoogleMapsAPI({
 	secure: true
 });
 
-class YahooWeather {
+class YahooWeather extends EventEmitter {
 
 	constructor(options) {
+		super()
 
 		// Set defaults
 		this.temp_metric = options.temp_metric;
@@ -23,6 +25,11 @@ class YahooWeather {
 		// These will be retrieved
 		this.woeid = undefined;
 
+		// Start polling for information
+		if (options.polling) {
+			this._startPolling();
+		}
+
 		// Retrieve city name and woeid
 		this._getWoeid();
 
@@ -30,7 +37,7 @@ class YahooWeather {
 		this.queries = function createQueries() {
 			return {
 				forecast: `select * from weather.forecast where woeid=${this.woeid} and u="${this.temp_metric}"`,
-				current: `select item.condition from weather.forecast where woeid=${this.woeid}`,
+				current: `select item.condition from weather.forecast where woeid=${this.woeid} and u="${this.temp_metric}"`,
 			};
 		};
 	}
@@ -146,6 +153,7 @@ class YahooWeather {
 				// Make the weather api request
 				this._queryYahooAPI('https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(this.queries().forecast) + '&format=json')
 					.then((data) => {
+
 						let jsonData = JSON.parse(data);
 
 						// If no data provided, try again
@@ -159,7 +167,7 @@ class YahooWeather {
 									resolve(this._parseData(data));
 								})
 								.catch((err) => {
-									
+
 									// Reject
 									reject(err);
 								});
@@ -186,10 +194,10 @@ class YahooWeather {
 
 	_parseData(data) {
 		let parsedData = JSON.parse(data).query.results;
-		
+
 		// If no data found throw error
-		if(!parsedData) throw Error("no data");
-		
+		if (!parsedData) throw Error("no data");
+
 		let forecasts = parsedData.channel.item.forecast;
 
 		// Loop over all forecasts
@@ -220,10 +228,89 @@ class YahooWeather {
 		for (let y in metadata) {
 			current[y] = metadata[y];
 		}
-		
+
 		return {
 			current: current,
 			forecasts: forecasts
+		}
+	}
+
+	_startPolling() {
+
+		// Refresh data every 60 seconds
+		setInterval(() => {
+
+			this.fetchData().then((data)=> {
+
+				// Construct updated data set
+				var newData = {
+					wind: data.current.wind,
+					atmosphere: data.current.atmosphere,
+					astronomy: data.current.astronomy,
+					temperature: data.current.temperature,
+					weatherType: data.current.type
+				};
+
+				// Iterate over first level
+				for (let x in this.data) {
+
+					// Check for more levels
+					if (typeof this.data[x] == "object") {
+
+						// Loop over second level
+						for (let y in this.data[x]) {
+							// console.log(x + "_" + y +":");
+							// console.log("New: " + newData[x][y]);
+							// console.log("Old: " + this.data[x][y]);
+							if (this.data[x][y] != newData[x][y]) {
+								console.log("change detected");
+								console.log(x + "_" + y);
+								this.emit(x + "_" + y, newData[x][y]);
+							}
+						}
+					}
+					else {
+						// console.log(x + ":");
+						// console.log("New: " + newData[x]);
+						// console.log("Old: " + this.data[x]);
+						if (this.data[x] != newData[x]) {
+							console.log("change detected");
+							console.log(x + ":");
+							this.emit(x, newData[x][y]);
+						}
+					}
+				}
+
+				// Update data set
+				this.data = newData;
+			})
+		}, 10000);
+	}
+
+	get(attribute, callback) {
+		if (attribute) {
+			var attrs = attribute.split("_");
+			var result;
+			if (this.data) {
+				if (attrs.length > 0) {
+					if (this.data[attrs[0]]) {
+						result = this.data[attrs[0]][attrs[1]];
+					}
+					else {
+						callback(true, false);
+					}
+				}
+				else {
+					result = this.data[attrs[0]];
+				}
+				callback(null, result);
+			}
+			else {
+				callback(true, false);
+			}
+		}
+		else {
+			callback(true, false);
 		}
 	}
 }
