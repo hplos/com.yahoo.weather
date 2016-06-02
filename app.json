@@ -1,11 +1,11 @@
 {
   "id": "com.yahoo.weather",
   "version": "1.0.0",
-  "compatibility": "0.x || 1.x",
+  "compatibility": ">=0.8.30",
   "category": "internet",
   "name": {
-    "en": "Yahoo Weather",
-    "nl": "Yahoo Weer"
+    "en": "Weather",
+    "nl": "Weer"
   },
   "description": {
     "en": "Weather information from Yahoo",
@@ -29,6 +29,74 @@
         ],
         "nl": [
           "weer"
+        ]
+      }
+    },
+    {
+      "id": "temperature",
+      "importance": 0.65,
+      "triggers": {
+        "en": [
+          "temperature",
+          "hot",
+          "warm",
+          "cold"
+        ],
+        "nl": [
+          "temperatuur",
+          "warm",
+          "koud"
+        ]
+      }
+    },
+    {
+      "id": "will",
+      "importance": 0.3,
+      "triggers": {
+        "en": [
+          "will",
+          "be",
+          "going",
+          "expected"
+        ],
+        "nl": [
+          "wordt",
+          "word",
+          "verwacht",
+          "verwachtte"
+        ]
+      }
+    },
+    {
+      "id": "outside",
+      "importance": 0.3,
+      "triggers": {
+        "en": [
+          "outside",
+          "outdoor",
+          "outdoors",
+          "outer"
+        ],
+        "nl": [
+          "buiten"
+        ]
+      }
+    },
+    {
+      "id": "current",
+      "importance": 0.3,
+      "triggers": {
+        "en": [
+          "current",
+          "present",
+          "right now",
+          "moment"
+        ],
+        "nl": [
+          "huidige",
+          "momenteel",
+          "actueel",
+          "acutele"
         ]
       }
     }

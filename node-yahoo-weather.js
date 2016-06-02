@@ -1,7 +1,6 @@
 'use strict';
 
 const request = require('request-promise');
-const geocoder = require('node-geocoder')('teleport', 'https');
 const GoogleMapsAPI = require('googlemaps');
 
 const googleMapsAPI = new GoogleMapsAPI({
@@ -37,16 +36,17 @@ class YahooWeather {
 	}
 
 	_reverseGeoLocation(lat, lon) {
-		return new Promise(function(resolve, reject){
+		return new Promise(function (resolve, reject) {
 			googleMapsAPI.reverseGeocode({
 				"latlng": `${lat},${lon}`,
 				"result_type": "locality",
 				"language": "en",
 				"location_type": "APPROXIMATE"
 			}, function (err, data) {
-				if(!err && data && data.results.length > 0){
+				if (!err && data && data.results.length > 0) {
 					resolve(data.results[0].address_components[0].long_name)
-				} else {
+				}
+				else {
 					reject()
 				}
 			});
@@ -121,7 +121,7 @@ class YahooWeather {
 			this._getWoeid().then(() => {
 
 				// Make the weather api request
-				this._queryYahooAPI('http://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(this.queries().forecast) + '&format=json')
+				this._queryYahooAPI('https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(this.queries().forecast) + '&format=json')
 					.then((data) => {
 						let jsonData = JSON.parse(data);
 
@@ -129,7 +129,7 @@ class YahooWeather {
 						if (!jsonData.query.results) {
 
 							// Make the weather api request
-							this._queryYahooAPI('http://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(this.queries().forecast) + '&format=json')
+							this._queryYahooAPI('https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(this.queries().forecast) + '&format=json')
 								.then((data) => {
 
 									// Resolve with data
@@ -168,8 +168,12 @@ const yahooConditions = [
 		'type': 'tornado',
 		'quantity': undefined,
 		'text': {
-			'singular': 'tornado',
-			'plural': 'tornados',
+			'adjective': undefined,
+			'noun': {
+				'nl': "tornado's",
+				'en': 'tornados',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -177,8 +181,12 @@ const yahooConditions = [
 		'type': 'tropical storm',
 		'quantity': undefined,
 		'text': {
-			'singular': 'tropical storm',
-			'plural': 'tropical storms',
+			'adjective': undefined,
+			'noun': {
+				'nl': 'een tropische storm',
+				'en': 'a tropical storm',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -186,8 +194,12 @@ const yahooConditions = [
 		'type': 'huricane',
 		'quantity': undefined,
 		'text': {
-			'singular': 'huricane',
-			'plural': 'huricanes',
+			'adjective': undefined,
+			'noun': {
+				'nl': 'een orkaan',
+				'en': 'a huricane',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -195,8 +207,12 @@ const yahooConditions = [
 		'type': 'severe thunderstorms',
 		'quantity': 'severe',
 		'text': {
-			'singular': 'thunderstorm',
-			'plural': 'thunderstorms',
+			'adjective': undefined,
+			'noun': {
+				'nl': 'zware onweersbuien',
+				'en': 'severe thunderstorms',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -204,8 +220,12 @@ const yahooConditions = [
 		'type': 'thunderstorm',
 		'quantity': 'severe',
 		'text': {
-			'singular': 'thunderstorm',
-			'plural': "thunderstorm's",
+			'adjective': undefined,
+			'noun': {
+				'nl': 'onweer',
+				'en': 'a thunderstorm',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -213,8 +233,12 @@ const yahooConditions = [
 		'type': 'rain and snow',
 		'quantity': 'mixed',
 		'text': {
-			'singular': 'rain and snow',
-			'plural': undefined,
+			'adjective': undefined,
+			'noun': {
+				'nl': 'regen en sneeuw',
+				'en': 'rain and snow',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -222,8 +246,12 @@ const yahooConditions = [
 		'type': 'rain and sleet',
 		'quantity': 'mixed',
 		'text': {
-			'singular': 'rain and sleet',
-			'plural': undefined,
+			'adjective': undefined,
+			'noun': {
+				'nl': 'regen en ijzel',
+				'en': 'rain and sleet',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -231,8 +259,12 @@ const yahooConditions = [
 		'type': 'snow and sleet',
 		'quantity': 'mixed',
 		'text': {
-			'singular': 'snow and sleet',
-			'plural': undefined,
+			'adjective': undefined,
+			'noun': {
+				'nl': 'sneeuw en ijzel',
+				'en': 'snow and sleet',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -240,8 +272,12 @@ const yahooConditions = [
 		'type': 'freezing drizzle',
 		'quantity': undefined,
 		'text': {
-			'singular': 'freezing drizzle',
-			'plural': undefined,
+			'adjective': undefined,
+			'noun': {
+				'nl': 'lichte ijzel',
+				'en': 'freezing drizzle',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -249,8 +285,15 @@ const yahooConditions = [
 		'type': 'drizzle',
 		'quantity': undefined,
 		'text': {
-			'singular': 'drizzle',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'licht regenachtige',
+				'en': 'drizzly'
+			},
+			'noun': {
+				'nl': 'motregen',
+				'en': 'drizzle',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -258,8 +301,12 @@ const yahooConditions = [
 		'type': 'freezing rain',
 		'quantity': undefined,
 		'text': {
-			'singular': 'freezing rain',
-			'plural': undefined,
+			'adjective': undefined,
+			'noun': {
+				'nl': 'ijzel',
+				'en': 'freezing rain',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -267,8 +314,15 @@ const yahooConditions = [
 		'type': 'shower',
 		'quantity': undefined,
 		'text': {
-			'singular': 'shower',
-			'plural': 'showers',
+			'adjective': {
+				'nl': 'regenachtige',
+				'en': 'rainy'
+			},
+			'noun': {
+				'nl': 'regenbuien',
+				'en': 'showers',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -276,8 +330,15 @@ const yahooConditions = [
 		'type': 'shower',
 		'quantity': undefined,
 		'text': {
-			'singular': 'shower',
-			'plural': 'showers',
+			'adjective': {
+				'nl': 'regenachtige',
+				'en': 'rainy'
+			},
+			'noun': {
+				'nl': 'regenbuien',
+				'en': 'showers',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -285,8 +346,12 @@ const yahooConditions = [
 		'type': 'snow flurry',
 		'quantity': undefined,
 		'text': {
-			'singular': 'snow flurry',
-			'plural': 'snow flurries',
+			'adjective': undefined,
+			'noun': {
+				'nl': 'sneeuw vlagen',
+				'en': 'snow flurry',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -294,8 +359,15 @@ const yahooConditions = [
 		'type': 'snow shower',
 		'quantity': 'light',
 		'text': {
-			'singular': 'snow shower',
-			'plural': 'snow showers',
+			'adjective': {
+				'nl': 'sneeuwachtige',
+				'en': 'snowy'
+			},
+			'noun': {
+				'nl': 'sneeuw',
+				'en': 'snow showers',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -303,8 +375,12 @@ const yahooConditions = [
 		'type': 'blowing snow',
 		'quantity': undefined,
 		'text': {
-			'singular': 'blowing snow',
-			'plural': 'blowing snow',
+			'adjective': undefined,
+			'noun': {
+				'nl': 'sneeuwbuien',
+				'en': 'blowing snow',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -312,8 +388,15 @@ const yahooConditions = [
 		'type': 'snow',
 		'quantity': undefined,
 		'text': {
-			'singular': 'snow',
-			'plural': 'snow',
+			'adjective': {
+				'nl': 'sneeuwachtige',
+				'en': 'snowy'
+			},
+			'noun': {
+				'nl': 'snow',
+				'en': 'snow',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -321,8 +404,12 @@ const yahooConditions = [
 		'type': 'hail',
 		'quantity': undefined,
 		'text': {
-			'singular': 'hail',
-			'plural': 'hail',
+			'adjective': undefined,
+			'noun': {
+				'nl': 'hagel',
+				'en': 'hail',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -330,8 +417,15 @@ const yahooConditions = [
 		'type': 'sleet',
 		'quantity': undefined,
 		'text': {
-			'singular': 'sleet',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'ijzelige',
+				'en': 'sleety'
+			},
+			'noun': {
+				'nl': 'ijzel',
+				'en': 'sleet',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -339,8 +433,15 @@ const yahooConditions = [
 		'type': 'dust',
 		'quantity': undefined,
 		'text': {
-			'singular': 'dust',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'stoffige',
+				'en': 'dusty'
+			},
+			'noun': {
+				'nl': 'stof',
+				'en': 'dust',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -348,8 +449,15 @@ const yahooConditions = [
 		'type': 'fog',
 		'quantity': undefined,
 		'text': {
-			'singular': 'foggy',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'mistige',
+				'en': 'foggy'
+			},
+			'noun': {
+				'nl': 'mist',
+				'en': 'fog',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -357,8 +465,15 @@ const yahooConditions = [
 		'type': 'haze',
 		'quantity': undefined,
 		'text': {
-			'singular': 'haze',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'mistige',
+				'en': 'hazy'
+			},
+			'noun': {
+				'nl': 'mist',
+				'en': 'haze',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -366,8 +481,12 @@ const yahooConditions = [
 		'type': 'smoke',
 		'quantity': undefined,
 		'text': {
-			'singular': 'smoky',
-			'plural': undefined,
+			'adjective': undefined,
+			'noun': {
+				'nl': 'rookwolken',
+				'en': 'smoke clouds',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -375,8 +494,15 @@ const yahooConditions = [
 		'type': 'wind',
 		'quantity': undefined,
 		'text': {
-			'singular': 'blustery',
-			'plural': 'strong winds',
+			'adjective': {
+				'nl': 'winderige',
+				'en': 'windy'
+			},
+			'noun': {
+				'nl': 'wind',
+				'en': 'wind',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -384,8 +510,15 @@ const yahooConditions = [
 		'type': 'wind',
 		'quantity': undefined,
 		'text': {
-			'singular': 'windy',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'winderige',
+				'en': 'windy'
+			},
+			'noun': {
+				'nl': 'wind',
+				'en': 'wind',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -393,8 +526,15 @@ const yahooConditions = [
 		'type': 'cold',
 		'quantity': undefined,
 		'text': {
-			'singular': 'cold',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'koude',
+				'en': 'cold'
+			},
+			'noun': {
+				'nl': 'kou',
+				'en': 'cold',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -402,8 +542,15 @@ const yahooConditions = [
 		'type': 'clouds',
 		'quantity': undefined,
 		'text': {
-			'singular': 'cloudy',
-			'plural': 'clouds',
+			'adjective': {
+				'nl': 'bewolkte',
+				'en': 'cloudy'
+			},
+			'noun': {
+				'nl': 'bewolking',
+				'en': 'clouds',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -411,8 +558,15 @@ const yahooConditions = [
 		'type': 'clouds',
 		'quantity': 'mostly',
 		'text': {
-			'singular': 'cloudy night',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'erg bewolkte',
+				'en': 'mostly cloudy'
+			},
+			'noun': {
+				'nl': 'veel bewolking',
+				'en': 'quite some clouds',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -420,8 +574,15 @@ const yahooConditions = [
 		'type': 'clouds',
 		'quantity': 'mostly',
 		'text': {
-			'singular': 'cloudy day',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'erg bewolkte',
+				'en': 'mostly cloudy'
+			},
+			'noun': {
+				'nl': 'veel bewolking',
+				'en': 'quite some clouds',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -429,8 +590,15 @@ const yahooConditions = [
 		'type': 'clouds',
 		'quantity': 'partly',
 		'text': {
-			'singular': 'cloudy night',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'licht bewolkte',
+				'en': 'partly cloudy'
+			},
+			'noun': {
+				'nl': 'lichte bewolking',
+				'en': 'some clouds',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -438,8 +606,15 @@ const yahooConditions = [
 		'type': 'clouds',
 		'quantity': 'partly',
 		'text': {
-			'singular': 'cloudy day',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'licht bewolkte',
+				'en': 'partially cloudy'
+			},
+			'noun': {
+				'nl': 'lichte bewolking',
+				'en': 'some clouds',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -447,8 +622,15 @@ const yahooConditions = [
 		'type': 'clear',
 		'quantity': undefined,
 		'text': {
-			'singular': 'clear night',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'heldere',
+				'en': 'clear'
+			},
+			'noun': {
+				'nl': 'helder',
+				'en': 'clear',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -456,8 +638,15 @@ const yahooConditions = [
 		'type': 'sun',
 		'quantity': undefined,
 		'text': {
-			'singular': 'sunny',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'zonnige',
+				'en': 'sunny'
+			},
+			'noun': {
+				'nl': 'zon',
+				'en': 'sun',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -465,8 +654,15 @@ const yahooConditions = [
 		'type': 'fair',
 		'quantity': undefined,
 		'text': {
-			'singular': 'fair night',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'mooie',
+				'en': 'fair'
+			},
+			'noun': {
+				'nl': 'mooi',
+				'en': 'fair',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -474,8 +670,15 @@ const yahooConditions = [
 		'type': 'fair',
 		'quantity': undefined,
 		'text': {
-			'singular': 'fair day',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'mooie',
+				'en': 'fair'
+			},
+			'noun': {
+				'nl': 'mooi',
+				'en': 'fair',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -483,8 +686,12 @@ const yahooConditions = [
 		'type': 'rain and hail',
 		'quantity': 'mixed',
 		'text': {
-			'singular': 'rain and hail',
-			'plural': undefined,
+			'adjective': undefined,
+			'noun': {
+				'nl': 'regen en hagel',
+				'en': 'rain and hail',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -492,8 +699,15 @@ const yahooConditions = [
 		'type': 'hot',
 		'quantity': undefined,
 		'text': {
-			'singular': 'hot',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'warme',
+				'en': 'hot'
+			},
+			'noun': {
+				'nl': 'warm',
+				'en': 'hot',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -501,8 +715,12 @@ const yahooConditions = [
 		'type': 'thunderstorm',
 		'quantity': undefined,
 		'text': {
-			'singular': 'isolated thunderstorm',
-			'plural': 'isolated thunderstorms',
+			'adjective': undefined,
+			'noun': {
+				'nl': 'zwaar onweer',
+				'en': 'thunderstorms',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -510,8 +728,12 @@ const yahooConditions = [
 		'type': 'thunderstorm',
 		'quantity': undefined,
 		'text': {
-			'singular': 'scattered thunderstorm',
-			'plural': 'scattered thunderstorms',
+			'adjective': undefined,
+			'noun': {
+				'nl': 'zwaar onweer',
+				'en': 'thunderstorms',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -519,8 +741,12 @@ const yahooConditions = [
 		'type': 'thunderstorm',
 		'quantity': undefined,
 		'text': {
-			'singular': 'scattered thunderstorm',
-			'plural': 'scattered thunderstorms',
+			'adjective': undefined,
+			'noun': {
+				'nl': 'zwaar onweer',
+				'en': 'thunderstorms',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -528,8 +754,15 @@ const yahooConditions = [
 		'type': 'shower',
 		'quantity': undefined,
 		'text': {
-			'singular': 'scattered shower',
-			'plural': 'scattered showers',
+			'adjective': {
+				'nl': 'regenachtige',
+				'en': 'rainy'
+			},
+			'noun': {
+				'nl': 'regenbuien',
+				'en': 'showers',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -537,8 +770,15 @@ const yahooConditions = [
 		'type': 'snow',
 		'quantity': 'heavy',
 		'text': {
-			'singular': 'heavy snow',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'sneeuwachtige',
+				'en': 'snowy'
+			},
+			'noun': {
+				'nl': 'zware sneeuwbuien',
+				'en': 'heavy snow',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -546,8 +786,15 @@ const yahooConditions = [
 		'type': 'snow',
 		'quantity': undefined,
 		'text': {
-			'singular': 'scattered snow shower',
-			'plural': 'cattered snow showers',
+			'adjective': {
+				'nl': 'sneeuwachtige',
+				'en': 'snowy'
+			},
+			'noun': {
+				'nl': 'sneeuwbuien',
+				'en': 'snow',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -555,8 +802,15 @@ const yahooConditions = [
 		'type': 'snow',
 		'quantity': 'heavy',
 		'text': {
-			'singular': 'heavy snow',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'sneeuwachtige',
+				'en': 'snowy'
+			},
+			'noun': {
+				'nl': 'zware sneeuwbuien',
+				'en': 'heavy snow',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -564,8 +818,15 @@ const yahooConditions = [
 		'type': 'clouds',
 		'quantity': 'partly',
 		'text': {
-			'singular': 'partly clouded',
-			'plural': undefined,
+			'adjective': {
+				'nl': 'matig bewolkte',
+				'en': 'partially cloudy'
+			},
+			'noun': {
+				'nl': 'matige bewolking',
+				'en': 'some clouds',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -573,8 +834,12 @@ const yahooConditions = [
 		'type': 'thundershowers',
 		'quantity': undefined,
 		'text': {
-			'singular': 'thundershowers',
-			'plural': undefined,
+			'adjective': undefined,
+			'noun': {
+				'nl': 'onweer en zware regenbuien',
+				'en': 'thunderstorms',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -582,8 +847,15 @@ const yahooConditions = [
 		'type': 'snow',
 		'quantity': undefined,
 		'text': {
-			'singular': 'snow shower',
-			'plural': 'snow showers',
+			'adjective': {
+				'nl': 'sneeuwachtige',
+				'en': 'snowy'
+			},
+			'noun': {
+				'nl': 'sneeuwbuien',
+				'en': 'snow',
+				'plural': false
+			}
 		},
 	},
 	{
@@ -591,8 +863,12 @@ const yahooConditions = [
 		'type': 'thundershowers',
 		'quantity': undefined,
 		'text': {
-			'singular': 'isolated thundershower',
-			'plural': 'isolated thundershowers',
+			'adjective': undefined,
+			'noun': {
+				'nl': 'onweer en zware regenbuien',
+				'en': 'thunderstorms',
+				'plural': true
+			}
 		},
 	},
 	{
@@ -600,8 +876,12 @@ const yahooConditions = [
 		'type': 'unavailable',
 		'quantity': undefined,
 		'text': {
-			'singular': 'unavailable',
-			'plural': undefined,
+			'adjective': undefined,
+			'noun': {
+				'nl': 'niet beschikbaar',
+				'en': 'unavailable',
+				'plural': false
+			}
 		},
 	},
 ];
