@@ -174,10 +174,10 @@ function listenForSpeechEvents(locationPromise) {
 		parseSpeechTime(speech, options);
 
 		// Fetch weather data
-		fetchWeatherData(locationPromise, options).then(data => {
+		fetchWeatherData(locationPromise, speech, options).then(data => {
 
 			// Use received data to create response to speech request
-			prepareResponse(options, data);
+			prepareResponse(speech, options, data);
 		});
 	});
 }
@@ -236,7 +236,7 @@ function parseSpeechTime(speech, options) {
 		if (speech.time.length > 1) {
 
 			// Let user know this cant be handled yet
-			say((options.language === "en") ? "Sorry, I don't understand what you mean, please specify your request" : 'Sorry, ik snap niet helemaal wat je bedoelt, kun je iets specifieker zijn?');
+			say((options.language === "en") ? "Sorry, I don't understand what you mean, please specify your request" : 'Sorry, ik snap niet helemaal wat je bedoelt, kun je iets specifieker zijn?', {}, speech);
 		}
 		else if (speech.time.length > 0) {
 
@@ -267,7 +267,7 @@ function parseSpeechTime(speech, options) {
  * @param options
  * @returns {Promise}
  */
-function fetchWeatherData(locationPromise, options) {
+function fetchWeatherData(locationPromise, speech, options) {
 	return new Promise((resolve, reject) => {
 
 		// Wait for location data to be fetched
@@ -298,7 +298,7 @@ function fetchWeatherData(locationPromise, options) {
 
 				// Handle unknown location
 				if (err.message == "converting location to woeid" || err.message == "no data") {
-					say((options.language == "en") ? "Sorry, I can not find weather information for that location" : "Sorry, ik kan geen weersinformatie vinden voor die locatie");
+					say((options.language == "en") ? "Sorry, I can not find weather information for that location" : "Sorry, ik kan geen weersinformatie vinden voor die locatie", {}, speech);
 				}
 
 				reject(err);
@@ -313,19 +313,19 @@ function fetchWeatherData(locationPromise, options) {
  * @param options
  * @param data
  */
-function prepareResponse(options, data) {
+function prepareResponse(speech, options, data) {
 
 	// Get forecast for specified date
 	switch (options.date) {
 		case "current":
 
 			// Let Homey say response
-			say(createResponse(options, data.current), options);
+			say(createResponse(options, data.current), options, speech);
 			break;
 		case "today":
 
 			// Let Homey say response
-			say(createResponse(options, data.forecasts[0]), options);
+			say(createResponse(options, data.forecasts[0]), options, speech);
 			break;
 		default:
 
@@ -338,7 +338,7 @@ function prepareResponse(options, data) {
 			}
 
 			// Let Homey say response
-			say(createResponse(options, data.forecasts[x]), options);
+			say(createResponse(options, data.forecasts[x]), options, speech);
 	}
 }
 
@@ -463,11 +463,11 @@ function createResponse(options, data) {
  * @param text
  * @param options
  */
-function say(text, options) {
+function say(text, options, speech) {
 
 	// Append location if desired
 	if (options && options.location) text += ` in ${options.location}`;
 
 	// Make Homey talk!
-	Homey.manager('speech-output').say(text);
+	speech.say(text);
 }
