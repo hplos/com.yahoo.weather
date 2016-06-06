@@ -79,13 +79,6 @@ function listenForWeatherChanges(locationPromise) {
 				atmosphere_pressure: parseFloat(value)
 			});
 
-		}).on("atmosphere_rising", value => { //TODO in app.json
-
-			// Trigger atmosphere rising flow (steady (0), rising (1), or falling (2))
-			Homey.manager('flow').trigger('atmosphere_rising', {
-				atmosphere_rising: parseFloat(value)
-			});
-
 		}).on("atmosphere_visibility", value => {
 
 			// Trigger atmosphere visibility flow (km)
@@ -113,13 +106,6 @@ function listenForWeatherChanges(locationPromise) {
 			Homey.manager('flow').trigger('temperature', {
 				temperature: parseFloat(value)
 			});
-
-		}).on("weatherType", value => { //TODO in app.json
-			
-			// Trigger weatherType flow (string)
-			Homey.manager('flow').trigger('weatherType', {
-				type: value
-			});
 		});
 
 		// When triggered, get latest structure data and check if status is home or not
@@ -131,14 +117,15 @@ function listenForWeatherChanges(locationPromise) {
 
 					// Parse result
 					let status = "steady";
-					if(parseInt(result) === 0) status == "steady";
-					else if(parseInt(result) === 1) status == "rising";
-					else if(parseInt(result) === 2) status == "falling";
+					if (parseInt(result) === 0) status == "steady";
+					else if (parseInt(result) === 1) status == "rising";
+					else if (parseInt(result) === 2) status == "falling";
 
 					// Callback result
 					callback(err, (status == args.status));
 				})
-			} else {
+			}
+			else {
 				callback(true, false);
 			}
 		});
@@ -169,15 +156,20 @@ function listenForSpeechEvents(locationPromise) {
 
 		// Parse speech triggers to options
 		parseSpeechTriggers(speech, options);
-
+		console.log("Parsing speech triggers done");
 		// Parse time object from speech to options
 		parseSpeechTime(speech, options);
+		console.log("Parsing speech time done");
 
 		// Fetch weather data
 		fetchWeatherData(locationPromise, speech, options).then(data => {
+			console.log("Fetching weather data done");
 
 			// Use received data to create response to speech request
 			prepareResponse(speech, options, data);
+
+			console.log("Prepare response done");
+
 		});
 	});
 }
@@ -349,6 +341,8 @@ function prepareResponse(speech, options, data) {
  * @returns {*} String that Homey will pronounce
  */
 function createResponse(options, data) {
+	console.log("Creating response...");
+	options.locationFirst = (Math.round(Math.random()) == 1);
 
 	// Determine form to use for sentence (noun/adjective)
 	let form;
@@ -383,20 +377,24 @@ function createResponse(options, data) {
 
 					// Create sentence
 					if (form == "noun") {
-						return `At the moment there ${prefix} ${data.text[form][options.language]}, and the temperature is ${data.temperature} degrees Celsius`;
+						if (options.locationFirst) return `there ${prefix} ${data.text[form][options.language]} at the moment, and the temperature is ${data.temperature} degrees Celsius`;
+						else return `At the moment there ${prefix} ${data.text[form][options.language]}, and the temperature is ${data.temperature} degrees Celsius`;
 					}
 					else {
-						return `At the moment it is ${data.text[form][options.language]}, and the temperature is ${data.temperature} degrees Celsius`;
+						if (options.locationFirst) return `it is ${data.text[form][options.language]} at the moment, and the temperature is ${data.temperature} degrees Celsius`;
+						else return `At the moment it is ${data.text[form][options.language]}, and the temperature is ${data.temperature} degrees Celsius`;
 					}
 				}
 				else {
 
 					// Create sentence
 					if (form == "noun") {
-						return `${options.dateTranscript} there ${prefix} ${data.text[form][options.language]} expected, the temperature will range from ${data.low} to ${data.high} degrees Celsius`;
+						if (options.locationFirst) return `there ${prefix} ${data.text[form][options.language]} expected ${options.dateTranscript}, the temperature will range from ${data.low} to ${data.high} degrees Celsius`;
+						else return `${options.dateTranscript} there ${prefix} ${data.text[form][options.language]} expected, the temperature will range from ${data.low} to ${data.high} degrees Celsius`;
 					}
 					else {
-						return `${options.dateTranscript} will be a ${data.text[form][options.language]} day, and the temperature will range from ${data.low} to ${data.high} degrees Celsius`;
+						if (options.locationFirst) return `it will be a ${data.text[form][options.language]} day ${options.dateTranscript}, and the temperature will range from ${data.low} to ${data.high} degrees Celsius`;
+						else return `${options.dateTranscript} will be a ${data.text[form][options.language]} day, and the temperature will range from ${data.low} to ${data.high} degrees Celsius`;
 					}
 				}
 			}
@@ -407,7 +405,8 @@ function createResponse(options, data) {
 					return `The outside temperature is ${data.temperature} degrees Celsius`;
 				}
 				else {
-					return `${options.dateTranscript} the temperature ${prefix} from ${data.low} to ${data.high} degrees Celsius`;
+					if (options.locationFirst) return `the temperature ${prefix} from ${data.low} to ${data.high} degrees Celsius ${options.dateTranscript}`;
+					else return `${options.dateTranscript} the temperature ${prefix} from ${data.low} to ${data.high} degrees Celsius`;
 				}
 			}
 			else {
@@ -423,18 +422,22 @@ function createResponse(options, data) {
 
 					// Create sentence
 					if (form == "noun") {
-						return `Op het moment is er ${data.text[form][options.language]}, en de temperatuur is ${data.temperature} graden Celsius`;
+						if (options.locationFirst) return `is er ${data.text[form][options.language]} op het moment, en de temperatuur is ${data.temperature} graden Celsius`;
+						else return `Op het moment is er ${data.text[form][options.language]}, en de temperatuur is ${data.temperature} graden Celsius`;
 					}
 					else {
+						if (options.locationFirst) return `wordt het ${options.dateTranscript} een ${data.text[form][options.language]} dag, en de temperatuur loopt op van ${data.low} tot ${data.high} graden Celsius`;
 						return `${options.dateTranscript} wordt een ${data.text[form][options.language]} dag, en de temperatuur loopt op van ${data.low} tot ${data.high} graden Celsius`;
 					}
 				}
 				else {
 					// Create sentence
 					if (form == "noun") {
-						return `${options.dateTranscript} wordt er ${data.text[form][options.language]} verwacht, de temperatuur loopt op van ${data.low} tot ${data.high} graden Celsius`;
+						if (options.locationFirst) return `wordt er ${options.dateTranscript} ${data.text[form][options.language]} verwacht, de temperatuur loopt op van ${data.low} tot ${data.high} graden Celsius`;
+						else return `${options.dateTranscript} wordt er ${data.text[form][options.language]} verwacht, de temperatuur loopt op van ${data.low} tot ${data.high} graden Celsius`;
 					}
 					else {
+						if (options.locationFirst) return `wordt het een ${data.text[form][options.language]} dag ${options.dateTranscript}, en de temperatuur loopt op van ${data.low} tot ${data.high} graden Celsius`;
 						return `${options.dateTranscript} wordt een ${data.text[form][options.language]} dag, en de temperatuur loopt op van ${data.low} tot ${data.high} graden Celsius`;
 					}
 				}
@@ -442,11 +445,18 @@ function createResponse(options, data) {
 			else if (options.temperatureTrigger) {
 
 				if (options.date === "current") {
-					return `De huidige temperatuur is ${data.temperature} graden Celsius`;
+					if (options.locationFirst) return `is de huidige temperatuur ${data.temperature} graden Celsius`;
+					else return `De huidige temperatuur is ${data.temperature} graden Celsius`;
 				}
 				else {
-					var prefix = (options.dateTranscript === "today") ? "loopt de temperatuur op" : "zal de temperatuur oplopen";
-					return `${options.dateTranscript} ${prefix} van ${data.low} tot ${data.high} graden Celsius`
+					if (options.locationFirst) {
+						const prefix = (options.dateTranscript === "today") ? "loopt de temperatuur op" : `zal de temperatuur ${options.dateTranscript} oplopen`;
+						return `${prefix} van ${data.low} tot ${data.high} graden Celsius`
+					}
+					else {
+						const prefix = (options.dateTranscript === "today") ? "loopt de temperatuur op" : "zal de temperatuur oplopen";
+						return `${options.dateTranscript} ${prefix} van ${data.low} tot ${data.high} graden Celsius`
+					}
 				}
 			}
 			else {
@@ -464,10 +474,22 @@ function createResponse(options, data) {
  * @param options
  */
 function say(text, options, speech) {
-
+	console.log("say: " + text);
+	let result;
 	// Append location if desired
-	if (options && options.location) text += ` in ${options.location}`;
+	if (options && options.location) {
+		if (options.locationFirst) {
+			result = `In ${options.location} ` + text;
+
+		}
+		else {
+			result = text + ` in ${options.location}`;
+		}
+	}
+	else {
+		result = text;
+	}
 
 	// Make Homey talk!
-	speech.say(text);
+	speech.say(result);
 }

@@ -14,7 +14,7 @@ const googleMapsAPI = new GoogleMapsAPI({
 class YahooWeather extends EventEmitter {
 
 	constructor(options) {
-		super()
+		super();
 
 		// Set defaults
 		this.temp_metric = options.temp_metric;
@@ -37,7 +37,7 @@ class YahooWeather extends EventEmitter {
 		this.queries = function createQueries() {
 			return {
 				forecast: `select * from weather.forecast where woeid=${this.woeid} and u="${this.temp_metric}"`,
-				current: `select item.condition from weather.forecast where woeid=${this.woeid} and u="${this.temp_metric}"`,
+				current: `select * from weather.forecast where woeid=${this.woeid} and u="f"`,
 			};
 		};
 	}
@@ -150,55 +150,116 @@ class YahooWeather extends EventEmitter {
 			// Make sure woeid is set
 			this._getWoeid().then(() => {
 
-				// Make the weather api request
-				this._queryYahooAPI('https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(this.queries().forecast) + '&format=json')
-					.then((data) => {
+				// Make two queries simultaneously
+				Promise.all([this._queryForecasts(), this._queryCurrent()]).then(data => {
+					if(data[0] && data[1]) {
+						
+						// Correct for wrong metric format by yahoo
+						data[0].atmosphere = data[1].atmosphere;
 
-						let jsonData = JSON.parse(data);
+						// Resolve
+						resolve(this._parseData(data[0]));
+						
+					} else {
+						
+						// Error
+						reject();
+					}
 
-						// If no data provided, try again
-						if (!jsonData.query.results) {
-
-							// Make the weather api request
-							this._queryYahooAPI('https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(this.queries().forecast) + '&format=json')
-								.then((data) => {
-
-									// Resolve with data
-									resolve(this._parseData(data));
-								})
-								.catch((err) => {
-
-									// Reject
-									reject(err);
-								});
-						}
-						else {
-
-							// Resolve with data
-							resolve(this._parseData(data));
-						}
-					})
-					.catch((err) => {
-
-						// Reject
-						reject(err);
-					});
-			})
-				.catch((err) => {
+				}).catch(err => {
 
 					// Reject
 					reject(err);
-				});
+				})
+
+			}).catch((err) => {
+
+				// Reject
+				reject(err);
+			});
 		});
 	}
 
+	_queryForecasts() {
+		return new Promise((resolve, reject) => {
+
+			// Make the weather api request
+			this._queryYahooAPI('https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(this.queries().forecast) + '&format=json')
+				.then((data) => {
+					let jsonData = JSON.parse(data);
+
+					// If no data provided, try again
+					if (!jsonData.query.results) {
+
+						// Make the weather api request
+						this._queryYahooAPI('https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(this.queries().forecast) + '&format=json')
+							.then((data) => {
+
+								// Resolve with data
+								resolve(JSON.parse(data).query.results.channel);
+							})
+							.catch((err) => {
+
+								// Reject
+								reject(err);
+							});
+					}
+					else {
+
+						// Resolve with data
+						resolve(jsonData.query.results.channel);
+					}
+				}).catch((err) => {
+
+				// Reject
+				reject(err);
+			});
+		})
+	}
+
+	_queryCurrent() {
+		return new Promise((resolve, reject) => {
+
+			// Make the weather api request
+			this._queryYahooAPI('https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(this.queries().current) + '&format=json')
+				.then((data) => {
+					let jsonData = JSON.parse(data);
+
+					// If no data provided, try again
+					if (!jsonData.query.results) {
+
+						// Make the weather api request
+						this._queryYahooAPI('https://query.yahooapis.com/v1/public/yql?q=' + encodeURIComponent(this.queries().current) + '&format=json')
+							.then((data) => {
+
+								// Resolve with data
+								resolve(JSON.parse(data).query.results.channel);
+							})
+							.catch((err) => {
+
+								// Reject
+								reject(err);
+							});
+					}
+					else {
+
+						// Resolve with data
+						resolve(jsonData.query.results.channel);
+					}
+				}).catch((err) => {
+
+				// Reject
+				reject(err);
+			});
+		})
+	}
+
 	_parseData(data) {
-		let parsedData = JSON.parse(data).query.results;
 
 		// If no data found throw error
-		if (!parsedData) throw Error("no data");
+		if (!data) throw Error("no data");
 
-		let forecasts = parsedData.channel.item.forecast;
+		let forecasts = data.item.forecast;
 
 		// Loop over all forecasts
 		for (let x in forecasts) {
@@ -214,11 +275,11 @@ class YahooWeather extends EventEmitter {
 
 		// Construct current object
 		let current = {
-			wind: parsedData.channel.wind,
-			atmosphere: parsedData.channel.atmosphere,
-			astronomy: parsedData.channel.astronomy,
-			code: parsedData.channel.item.condition.code,
-			temperature: parsedData.channel.item.condition.temp
+			wind: data.wind,
+			atmosphere: data.atmosphere,
+			astronomy: data.astronomy,
+			code: data.item.condition.code,
+			temperature: data.item.condition.temp
 		};
 
 		// Get metadata for current
@@ -813,7 +874,7 @@ const yahooConditions = [
 			},
 			'noun': {
 				'nl': 'mooi',
-				'en': 'fair',
+				'en': undefined,
 				'plural': false
 			}
 		},
@@ -829,7 +890,7 @@ const yahooConditions = [
 			},
 			'noun': {
 				'nl': 'mooi',
-				'en': 'fair',
+				'en': undefined,
 				'plural': false
 			}
 		},
