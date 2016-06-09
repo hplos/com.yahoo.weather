@@ -1,6 +1,6 @@
 {
   "id": "com.yahoo.weather",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "compatibility": ">=0.8.30",
   "category": "internet",
   "name": {
@@ -37,6 +37,9 @@
             "title": {
               "en": "degrees",
               "nl": "graden"
+            },
+            "example": {
+              "en": "61"
             }
           }
         ]
@@ -53,6 +56,9 @@
             "title": {
               "en": "degrees",
               "nl": "graden"
+            },
+            "example": {
+              "en": "35"
             }
           }
         ]
@@ -69,6 +75,9 @@
             "title": {
               "en": "kph",
               "nl": "km/u"
+            },
+            "example": {
+              "en": "22"
             }
           }
         ]
@@ -85,6 +94,9 @@
             "title": {
               "en": "percent",
               "nl": "percentage"
+            },
+            "example": {
+              "en": "82"
             }
           }
         ]
@@ -99,8 +111,11 @@
           {
             "name": "mb",
             "title": {
-              "en": "millibar",
-              "nl": "millibar"
+              "en": "hPa",
+              "nl": "hPa"
+            },
+            "example": {
+              "en": "1017"
             }
           }
         ]
@@ -117,6 +132,9 @@
             "title": {
               "en": "kilometres",
               "nl": "kilometers"
+            },
+            "example": {
+              "en": "15"
             }
           }
         ]
@@ -133,6 +151,9 @@
             "title": {
               "en": "time",
               "nl": "tijd"
+            },
+            "example": {
+              "en": "6:15 am"
             }
           }
         ]
@@ -149,6 +170,9 @@
             "title": {
               "en": "time",
               "nl": "tijd"
+            },
+            "example": {
+              "en": "9:32 pm"
             }
           }
         ]
@@ -165,6 +189,9 @@
             "title": {
               "en": "temp",
               "nl": "temp"
+            },
+            "example": {
+              "en": "23"
             }
           }
         ]

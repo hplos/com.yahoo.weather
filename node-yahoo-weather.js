@@ -152,16 +152,17 @@ class YahooWeather extends EventEmitter {
 
 				// Make two queries simultaneously
 				Promise.all([this._queryForecasts(), this._queryCurrent()]).then(data => {
-					if(data[0] && data[1]) {
-						
+					if (data[0] && data[1]) {
+
 						// Correct for wrong metric format by yahoo
 						data[0].atmosphere = data[1].atmosphere;
 
 						// Resolve
 						resolve(this._parseData(data[0]));
-						
-					} else {
-						
+
+					}
+					else {
+
 						// Error
 						reject();
 					}
@@ -320,23 +321,17 @@ class YahooWeather extends EventEmitter {
 
 						// Loop over second level
 						for (let y in this.data[x]) {
-							// console.log(x + "_" + y +":");
-							// console.log("New: " + newData[x][y]);
-							// console.log("Old: " + this.data[x][y]);
 							if (this.data[x][y] != newData[x][y]) {
 								console.log("change detected");
-								console.log(x + "_" + y);
+								console.log(x + "_" + y + " old: " + this.data[x][y] + " new: " + newData[x][y]);
 								this.emit(x + "_" + y, newData[x][y]);
 							}
 						}
 					}
 					else {
-						// console.log(x + ":");
-						// console.log("New: " + newData[x]);
-						// console.log("Old: " + this.data[x]);
 						if (this.data[x] != newData[x]) {
 							console.log("change detected");
-							console.log(x + ":");
+							console.log(x + " old: " + this.data[x] + " new: " + newData[x]);
 							this.emit(x, newData[x][y]);
 						}
 					}
