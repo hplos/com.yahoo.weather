@@ -243,9 +243,6 @@
       "triggers": {
         "en": [
           "weather"
-        ],
-        "nl": [
-          "weer"
         ]
       }
     },
@@ -258,11 +255,6 @@
           "hot",
           "warm",
           "cold"
-        ],
-        "nl": [
-          "temperatuur",
-          "warm",
-          "koud"
         ]
       }
     },
@@ -275,12 +267,6 @@
           "be",
           "going",
           "expected"
-        ],
-        "nl": [
-          "wordt",
-          "word",
-          "verwacht",
-          "verwachtte"
         ]
       }
     },
@@ -293,9 +279,6 @@
           "outdoor",
           "outdoors",
           "outer"
-        ],
-        "nl": [
-          "buiten"
         ]
       }
     },
@@ -308,13 +291,6 @@
           "present",
           "right now",
           "moment"
-        ],
-        "nl": [
-          "huidige",
-          "momenteel",
-          "actueel",
-          "acutele",
-          "nu"
         ]
       }
     },
@@ -323,9 +299,6 @@
       "importance": 0.3,
       "triggers": {
         "en": [
-          "in"
-        ],
-        "nl": [
           "in"
         ]
       }
