@@ -48,42 +48,42 @@ function listenForWeatherChanges(locationPromise) {
 
 			// Trigger wind chill flow(degrees)
 			Homey.manager('flow').trigger('wind_chill', {
-				wind_chill: parseFloat(value)
+				degrees: parseFloat(value)
 			});
 
 		}).on("wind_direction", value => {
 
 			// Trigger wind direction flow (degrees)
 			Homey.manager('flow').trigger('wind_direction', {
-				wind_direction: parseFloat(value)
+				degrees: parseFloat(value)
 			});
 
 		}).on("wind_speed", value => {
 
 			// Trigger wind speed flow (kph)
 			Homey.manager('flow').trigger('wind_speed', {
-				wind_speed: parseFloat(value)
+				kph: parseFloat(value)
 			});
 
 		}).on("atmosphere_humidity", value => {
 
 			// Trigger atmosphere humidity flow (mb)
 			Homey.manager('flow').trigger('atmosphere_humidity', {
-				atmosphere_humidity: parseFloat(value)
+				percent: parseFloat(value)
 			});
 
 		}).on("atmosphere_pressure", value => {
 
 			// Trigger atmosphere pressure flow (percentage)
 			Homey.manager('flow').trigger('atmosphere_pressure', {
-				atmosphere_pressure: parseFloat(value)
+				mb: parseFloat(value)
 			});
 
 		}).on("atmosphere_visibility", value => {
 
 			// Trigger atmosphere visibility flow (km)
 			Homey.manager('flow').trigger('atmosphere_visibility', {
-				atmosphere_visibility: parseFloat(value)
+				km: parseFloat(value)
 			});
 
 		}).on("astronomy_sunrise", value => {
