@@ -298,7 +298,7 @@ class YahooWeather extends EventEmitter {
 	}
 
 	_startPolling() {
-
+		
 		// Refresh data every 60 seconds
 		setInterval(() => {
 
@@ -312,7 +312,7 @@ class YahooWeather extends EventEmitter {
 					temperature: data.current.temperature,
 					weatherType: data.current.type
 				};
-
+				
 				// Iterate over first level
 				for (let x in this.data) {
 
@@ -322,16 +322,12 @@ class YahooWeather extends EventEmitter {
 						// Loop over second level
 						for (let y in this.data[x]) {
 							if (this.data[x][y] != newData[x][y]) {
-								console.log("change detected");
-								console.log(x + "_" + y + " old: " + this.data[x][y] + " new: " + newData[x][y]);
 								this.emit(x + "_" + y, newData[x][y]);
 							}
 						}
 					}
 					else {
 						if (this.data[x] != newData[x]) {
-							console.log("change detected");
-							console.log(x + " old: " + this.data[x] + " new: " + newData[x]);
 							this.emit(x, newData[x][y]);
 						}
 					}
@@ -340,7 +336,7 @@ class YahooWeather extends EventEmitter {
 				// Update data set
 				this.data = newData;
 			})
-		}, 10000);
+		}, 30000);
 	}
 
 	get(attribute, callback) {
