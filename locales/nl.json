@@ -1,3 +1,45 @@
 {
-
+  "general": {
+    "error": "Sorry, er ging iets fout, probeer het nog eens",
+    "confused": "Het spijt me, ik weet niet wat je bedoelt, probeer het nog eens",
+    "no_data_on_location": "Sorry, ik kan geen weersinformatie vinden voor die locatie",
+    "no_forecast": "Helaas, er is voor deze dag nog geen weersverwachting beschikbaar",
+    "ranges": "loopt de temperatuur op",
+    "will_range": "zal de temperatuur oplopen",
+    "wait1": "Een momentje",
+    "wait2": "Een ogenblikje",
+    "today": "vandaag"
+  },
+  "weather": {
+    "current": {
+      "noun": {
+        "location_first": "is er __weather__ op het moment, en de temperatuur is __temperature__ graden Celsius",
+        "location_last": "Op het moment is er __weather__, en de temperatuur is __temperature__ graden Celsius"
+      },
+      "adjective": {
+        "location_first": "wordt het __moment__ een __weather__ dag, en de temperatuur loopt op van __low__ tot __high__ graden Celsius",
+        "location_last": "__moment__ wordt een __weather__ dag, en de temperatuur loopt op van __low__ tot __high__ graden Celsius"
+      }
+    },
+    "date": {
+      "noun": {
+        "location_first": "wordt er __moment__ __weather__ verwacht, de temperatuur loopt op van __low__ tot __high__ graden Celsius",
+        "location_last": "__moment__ wordt er __weather__ verwacht, de temperatuur loopt op van __low__ tot __high__ graden Celsius"
+      },
+      "adjective": {
+        "location_first": "wordt het een __weather__ dag __moment__, en de temperatuur loopt op van __low__ tot __high__ graden Celsius",
+        "location_last": "__moment__ wordt een __weather__ dag, en de temperatuur loopt op van __low__ tot __high__ graden Celsius"
+      }
+    }
+  },
+  "temperature": {
+    "current": {
+      "location_first": "is de huidige temperatuur __temperature__ graden Celsius",
+      "location_last": "de huidige temperatuur is __temperature__ graden Celsius"
+    },
+    "date": {
+      "location_first": "__prefix__ van __low__ tot __high__ graden Celsius",
+      "location_last": "__moment__ __prefix__ van __low__ tot __high__ graden Celsius"
+    }
+  }
 }

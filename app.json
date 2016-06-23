@@ -1,6 +1,6 @@
 {
   "id": "com.yahoo.weather",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "compatibility": ">=0.8.30",
   "category": "internet",
   "name": {
@@ -21,7 +21,8 @@
   },
   "permissions": [
     "homey:manager:geolocation",
-    "homey:manager:speech-output"
+    "homey:manager:speech-output",
+    "homey:manager:ledring"
   ],
   "flow": {
     "triggers": [
@@ -243,6 +244,9 @@
       "triggers": {
         "en": [
           "weather"
+        ],
+        "nl": [
+          "weer"
         ]
       }
     },
@@ -255,6 +259,11 @@
           "hot",
           "warm",
           "cold"
+        ],
+        "nl": [
+          "temperatuur",
+          "warm",
+          "koud"
         ]
       }
     },
@@ -267,6 +276,12 @@
           "be",
           "going",
           "expected"
+        ],
+        "nl": [
+          "wordt",
+          "word",
+          "verwacht",
+          "verwachtte"
         ]
       }
     },
@@ -279,6 +294,9 @@
           "outdoor",
           "outdoors",
           "outer"
+        ],
+        "nl": [
+          "buiten"
         ]
       }
     },
@@ -291,6 +309,13 @@
           "present",
           "right now",
           "moment"
+        ],
+        "nl": [
+          "huidige",
+          "momenteel",
+          "actueel",
+          "acutele",
+          "nu"
         ]
       }
     },
@@ -299,6 +324,9 @@
       "importance": 0.3,
       "triggers": {
         "en": [
+          "in"
+        ],
+        "nl": [
           "in"
         ]
       }

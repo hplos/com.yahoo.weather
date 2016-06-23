@@ -1,3 +1,45 @@
 {
-
+	"general": {
+		"error": "Sorry, something went wrong, please try again",
+		"confused": "I'm sorry, I don't know what you mean, could you try again?",
+		"no_data_on_location": "Sorry, I can not find weather information for that location",
+		"no_forecast": "I am sorry, there is no forecast available for this day yet",
+		"ranges": "ranges",
+		"will_range": "will range",
+		"wait1": "One moment please",
+		"wait2": "Just a sec",
+		"today": "today"
+	},
+	"weather": {
+		"current": {
+			"noun": {
+				"location_first": "there __prefix__ __weather__ at the moment, and the temperature is __temperature__ degrees Celsius",
+				"location_last": "At the moment there __prefix__ __weather__, and the temperature is __temperature__ degrees Celsius"
+			},
+			"adjective": {
+				"location_first": "it is __weather__ at the moment, and the temperature is __temperature__ degrees Celsius",
+				"location_last": "At the moment it is __weather__, and the temperature is __temperature__ degrees Celsius"
+			}
+		},
+		"date": {
+			"noun": {
+				"location_first": "there __prefix__ __weather__ expected __moment__, the temperature will range from __low__ to __high__ degrees Celsius",
+				"location_last": "__moment__ there __prefix__ __weather__ expected, the temperature will range from __low__ to __high__ degrees Celsius"
+			},
+			"adjective": {
+				"location_first": "it will be a __weather__ day __moment__, and the temperature will range from __low__ to __high__ degrees Celsius",
+				"location_last": "__moment__ will be a __weather__ day, and the temperature will range from __low__ to __high__ degrees Celsius"
+			}
+		}
+	},
+	"temperature": {
+		"current": {
+			"location_first": "the outside temperature is __temperature__ degrees Celsius",
+			"location_last": "The outside temperature is __temperature__ degrees Celsius"
+		},
+		"date": {
+			"location_first": "the temperature __prefix__ from __low__ to __high__ degrees Celsius __moment__",
+			"location_last": "__moment__ the temperature __prefix__ from __low__ to __high__ degrees Celsius"
+		}
+	}
 }
