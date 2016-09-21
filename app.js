@@ -209,7 +209,6 @@ function listenForSpeechEvents(locationPromise) {
 
 			// Fetch weather data
 			fetchWeatherData(locationPromise, speech, options).then(data => {
-
 				console.log('Yahoo Weather: fetching weather data done');
 
 				// Use received data to create response to speech request
@@ -361,8 +360,10 @@ function fetchWeatherData(locationPromise, speech, options) {
 				}).catch(err => {
 
 					// Handle unknown location
-					if (err.message === 'converting location to woeid' || err.message === 'no data') {
+					if (err && (err.message === 'converting location to woeid' || err.message === 'no data')) {
 						say(__('general.no_data_on_location'), {}, speech);
+					} else {
+						say(__('general.error'), {}, speech);
 					}
 
 					reject(err);

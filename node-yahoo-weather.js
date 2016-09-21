@@ -23,22 +23,18 @@ class YahooWeather extends EventEmitter {
 		this.longitude = options.longitude;
 		this.location = options.location;
 
-		// These will be retrieved
-		this.woeid = undefined;
-
 		// Start polling for information
 		if (options.polling) {
 			this._startPolling();
 		}
 
-		// Retrieve city name and woeid
-		this._getWoeid();
-
 		// Expose yahoo weather queries
-		this.queries = function createQueries() {
+		this.queries = function createQueries(location) {
 			return {
-				forecast: `select * from weather.forecast where woeid=${this.woeid} and u="${this.temp_metric}"`,
-				current: `select * from weather.forecast where woeid=${this.woeid} and u="f"`,
+				forecast: `select * from weather.forecast where woeid in (select woeid from geo.places(1) 
+				where text="${location}") and u="${this.temp_metric}"`,
+				current: `select * from weather.forecast where woeid in (select woeid from geo.places(1) 
+				where text="${location}") and u="f"`,
 			};
 		};
 	}
@@ -60,75 +56,6 @@ class YahooWeather extends EventEmitter {
 		});
 	}
 
-	_convertLocationToWoeid(location) {
-
-		// Make request to retrieve woeid of location
-		return request(`http://where.yahooapis.com/v1/places.q('${location}')?format=json&appid=${Homey.env.YAHOO_CLIENT_ID}`);
-	}
-
-	_getWoeid() {
-
-		// Do not re-fetch value if present
-		if (this.woeid) return Promise.resolve(this.woeid);
-
-		// Fetch woeid and return promise
-		return new Promise((resolve, reject) => {
-
-			// Check if lat long are provided
-			if (this.latitude && this.longitude) {
-
-				// First reverse lat long to a location name
-				this._reverseGeoLocation(this.latitude, this.longitude)
-					.then((locationRes) => {
-
-						// Store location name
-						this.location = locationRes;
-
-						// Covert location name to woeid
-						this._convertLocationToWoeid(this.location)
-							.then((woeidRes) => {
-
-								// Store woeid
-								this.woeid = JSON.parse(woeidRes).places.place[0].woeid;
-
-								// Resolve promise
-								resolve(this.woeid);
-							})
-							.catch((err) => {
-								console.error(`Yahoo Weather: error converting location to woeid: ${err}`);
-
-								// Failed
-								reject(err);
-							});
-					})
-					.catch((err) => {
-						console.error(`Yahoo Weather: error reversing geo location: ${err}`);
-
-						// Failed
-						reject(err);
-					});
-			} else if (this.location) { // Get woeid from provided location
-
-				// Covert location name to woeid
-				this._convertLocationToWoeid(this.location)
-					.then((res) => {
-
-						// Store woeid
-						this.woeid = JSON.parse(res).places.place[0].woeid;
-
-						// Resolve promise
-						resolve(this.woeid);
-					})
-					.catch((err) => {
-						console.error(`Yahoo Weather: error converting location to woeid: ${err}`);
-
-						// Failed
-						reject(new Error('converting location to woeid'));
-					});
-			}
-		});
-	}
-
 	_queryYahooAPI(weatherYQL) {
 
 		// Make request to fetch weather information from yahoo
@@ -145,12 +72,23 @@ class YahooWeather extends EventEmitter {
 
 		// Return promise
 		return new Promise((resolve, reject) => {
+			new Promise(locationResolve => {
 
-			// Make sure woeid is set
-			this._getWoeid().then(() => {
+				// If lat long provided, do reverse geocoding
+				if (this.latitude && this.longitude) {
+
+					// Do reverse geolocation (lat, lng to location name)
+					this._reverseGeoLocation(this.latitude, this.longitude)
+						.then((location) => locationResolve(location))
+						.catch(err => reject(err));
+				} else {
+					// Resolve with location object found in speech
+					locationResolve(this.location);
+				}
+			}).then(location => {
 
 				// Make two queries simultaneously
-				Promise.all([this._queryForecasts(), this._queryCurrent()]).then(data => {
+				Promise.all([this._queryForecasts(location), this._queryCurrent(location)]).then(data => {
 					if (data[0] && data[1]) {
 
 						// Correct for wrong metric format by yahoo
@@ -165,17 +103,15 @@ class YahooWeather extends EventEmitter {
 					}
 
 				}).catch(err => reject(err));
-
-			}).catch(err => reject(err));
-
+			});
 		});
 	}
 
-	_queryForecasts() {
+	_queryForecasts(location) {
 		return new Promise((resolve, reject) => {
 
 			// Make the weather api request
-			this._queryYahooAPI(`https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(this.queries().forecast)}&format=json`)
+			this._queryYahooAPI(`https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(this.queries(location).forecast)}&format=json`)
 				.then((data1) => {
 					const jsonData = JSON.parse(data1);
 
@@ -183,14 +119,13 @@ class YahooWeather extends EventEmitter {
 					if (!jsonData.query.results) {
 
 						// Make the weather api request
-						this._queryYahooAPI(`https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(this.queries().forecast)}&format=json`)
+						this._queryYahooAPI(`https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(this.queries(location).forecast)}&format=json`)
 							.then((data2) => {
 
 								// Resolve with data
 								resolve(JSON.parse(data2).query.results.channel);
 							})
 							.catch((err) => {
-
 								// Reject
 								reject(err);
 							});
@@ -208,11 +143,11 @@ class YahooWeather extends EventEmitter {
 		});
 	}
 
-	_queryCurrent() {
+	_queryCurrent(location) {
 		return new Promise((resolve, reject) => {
 
 			// Make the weather api request
-			this._queryYahooAPI(`https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(this.queries().current)}&format=json`)
+			this._queryYahooAPI(`https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(this.queries(location).current)}&format=json`)
 				.then((data1) => {
 					const jsonData = JSON.parse(data1);
 
@@ -220,7 +155,7 @@ class YahooWeather extends EventEmitter {
 					if (!jsonData.query.results) {
 
 						// Make the weather api request
-						this._queryYahooAPI(`https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(this.queries().current)}&format=json`)
+						this._queryYahooAPI(`https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(this.queries(location).current)}&format=json`)
 							.then((data2) => {
 
 								// Resolve with data
