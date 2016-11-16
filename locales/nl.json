@@ -8,7 +8,9 @@
     "will_range": "zal de temperatuur oplopen",
     "wait1": "Een momentje",
     "wait2": "Een ogenblikje",
-    "today": "vandaag"
+    "today": "vandaag",
+    "yahoo_timeout": "Sorry, de yahoo weer service reageert niet, probeer het later nog eens",
+    "google_api_error": "Sorry, de Google Maps service reageert niet, probeer het later nog eens"
   },
   "weather": {
     "current": {

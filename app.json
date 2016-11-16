@@ -1,6 +1,6 @@
 {
   "id": "com.yahoo.weather",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "compatibility": ">=0.8.30",
   "category": "internet",
   "name": {
@@ -22,6 +22,7 @@
   "permissions": [
     "homey:manager:geolocation",
     "homey:manager:speech-output",
+    "homey:manager:speech-input",
     "homey:manager:ledring"
   ],
   "flow": {

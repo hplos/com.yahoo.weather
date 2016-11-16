@@ -8,7 +8,9 @@
 		"will_range": "will range",
 		"wait1": "One moment please",
 		"wait2": "Just a sec",
-		"today": "today"
+		"today": "today",
+		"yahoo_timeout": "I am sorry, the yahoo weather service is not responding, please try again later",
+		"google_api_error": "I am sorry, the Google Maps service is not responding, please try again later"
 	},
 	"weather": {
 		"current": {

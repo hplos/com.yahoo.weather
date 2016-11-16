@@ -22,6 +22,7 @@ class YahooWeather extends EventEmitter {
 		this.latitude = options.latitude;
 		this.longitude = options.longitude;
 		this.location = options.location;
+		this.reverseGeoLocation = options.reverseGeoLocation;
 
 		// Start polling for information
 		if (options.polling) {
@@ -48,6 +49,7 @@ class YahooWeather extends EventEmitter {
 				location_type: 'APPROXIMATE',
 			}, (err, data) => {
 				if (!err && data && data.results.length > 0) {
+					this.reverseGeoLocation = data.results[0].address_components[0].long_name;
 					resolve(data.results[0].address_components[0].long_name);
 				} else {
 					reject();
@@ -68,7 +70,7 @@ class YahooWeather extends EventEmitter {
 		return yahooConditions[(code === '3200') ? 48 : code];
 	}
 
-	fetchData() {
+	fetchData(polling) {
 
 		// Return promise
 		return new Promise((resolve, reject) => {
@@ -77,11 +79,25 @@ class YahooWeather extends EventEmitter {
 				// If lat long provided, do reverse geocoding
 				if (this.latitude && this.longitude) {
 
-					// Do reverse geolocation (lat, lng to location name)
-					this._reverseGeoLocation(this.latitude, this.longitude)
-						.then((location) => locationResolve(location))
-						.catch(err => reject(err));
+					if (polling) {
+						if (!this.reverseGeoLocation) {
+
+							// Do reverse geolocation (lat, lng to location name)
+							this._reverseGeoLocation(this.latitude, this.longitude)
+								.then((location) => locationResolve(location))
+								.catch(err => reject('google'));
+						} else {
+							resolve(this.reverseGeoLocation);
+						}
+					} else {
+
+						// Do reverse geolocation (lat, lng to location name)
+						this._reverseGeoLocation(this.latitude, this.longitude)
+							.then((location) => locationResolve(location))
+							.catch(err => reject('google'));
+					}
 				} else {
+
 					// Resolve with location object found in speech
 					locationResolve(this.location);
 				}
@@ -225,7 +241,7 @@ class YahooWeather extends EventEmitter {
 		// Refresh data every 60 seconds
 		setInterval(() => {
 
-			this.fetchData().then((data) => {
+			this.fetchData(true).then((data) => {
 
 				// Construct updated data set
 				const newData = {

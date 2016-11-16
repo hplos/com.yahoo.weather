@@ -6,6 +6,7 @@ let defaultLocation = {
 	latitude: undefined,
 	longitude: undefined,
 };
+const language = Homey.manager('i18n').getLanguage();
 
 module.exports.init = function init() {
 
@@ -14,7 +15,6 @@ module.exports.init = function init() {
 
 		// Ask Homey for current location
 		Homey.manager('geolocation').getLocation((err, location) => {
-
 			// Reject or resolve the promise
 			if (err) reject(err);
 			else {
@@ -186,8 +186,8 @@ function listenForSpeechEvents(locationPromise) {
 			weatherTrigger: false,
 			temperatureTrigger: false,
 			date: 'current',
-			language: speech.language,
-			dateTranscript: (speech.language === 'en') ? 'today' : 'vandaag',
+			language: language,
+			dateTranscript: (language === 'en') ? 'today' : 'vandaag',
 		};
 
 		// Say something to indicate processing
@@ -196,6 +196,12 @@ function listenForSpeechEvents(locationPromise) {
 		} else {
 			speech.say(__('general.wait2'));
 		}
+
+		// If no response after 10 seconds abort
+		const timeout = setTimeout(() => {
+			options.abort = true;
+			speech.say(__('general.yahoo_timeout'));
+		}, 10000);
 
 		// Parse speech triggers to options
 		if (!options.abort) parseSpeechTriggers(speech, options);
@@ -210,6 +216,9 @@ function listenForSpeechEvents(locationPromise) {
 			// Fetch weather data
 			fetchWeatherData(locationPromise, speech, options).then(data => {
 				console.log('Yahoo Weather: fetching weather data done');
+
+				// Clear timeout we have got a respons
+				clearTimeout(timeout);
 
 				// Use received data to create response to speech request
 				prepareResponse(speech, options, data);
@@ -362,6 +371,8 @@ function fetchWeatherData(locationPromise, speech, options) {
 					// Handle unknown location
 					if (err && (err.message === 'converting location to woeid' || err.message === 'no data')) {
 						say(__('general.no_data_on_location'), {}, speech);
+					} else if (err === 'google') {
+						speech.say(__('general.google_api_error'));
 					} else {
 						say(__('general.error'), {}, speech);
 					}
