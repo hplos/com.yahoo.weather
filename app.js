@@ -217,7 +217,7 @@ function listenForSpeechEvents(locationPromise) {
 			fetchWeatherData(locationPromise, speech, options).then(data => {
 				console.log('Yahoo Weather: fetching weather data done');
 
-				// Clear timeout we have got a respons
+				// Clear timeout we have got a response
 				clearTimeout(timeout);
 
 				// Use received data to create response to speech request
@@ -463,23 +463,27 @@ function createResponse(options, data) {
 					return __('weather.current.noun.location_first', {
 						prefix: prefix,
 						weather: data.text[form][options.language],
+						moment: options.dateTranscript,
 						temperature: data.temperature,
 					});
 				}
 				return __('weather.current.noun.location_last', {
 					prefix: prefix,
 					weather: data.text[form][options.language],
+					moment: options.dateTranscript,
 					temperature: data.temperature,
 				});
 			}
 			if (options.locationFirst) {
 				return __('weather.current.adjective.location_first', {
 					weather: data.text[form][options.language],
+					moment: options.dateTranscript,
 					temperature: data.temperature,
 				});
 			}
 			return __('weather.current.adjective.location_last', {
 				weather: data.text[form][options.language],
+				moment: options.dateTranscript,
 				temperature: data.temperature,
 			});
 		}

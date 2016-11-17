@@ -19,8 +19,8 @@
         "location_last": "Op het moment is er __weather__, en de temperatuur is __temperature__ graden Celsius"
       },
       "adjective": {
-        "location_first": "wordt het __moment__ een __weather__ dag, en de temperatuur loopt op van __low__ tot __high__ graden Celsius",
-        "location_last": "__moment__ wordt een __weather__ dag, en de temperatuur loopt op van __low__ tot __high__ graden Celsius"
+        "location_first": "wordt het __moment__ een __weather__ dag, en de temperatuur wordt __temperature__ graden Celsius",
+        "location_last": "__moment__ wordt een __weather__ dag, en de temperatuur wordt __temperature__ graden Celsius"
       }
     },
     "date": {
