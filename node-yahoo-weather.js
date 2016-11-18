@@ -2,15 +2,7 @@
 
 const request = require('request-promise');
 const yahooConditions = require('./yahoo-conditions');
-const GoogleMapsAPI = require('googlemaps');
 const EventEmitter = require('events');
-
-const googleMapsAPI = new GoogleMapsAPI({
-	key: Homey.env.GOOGLE_API_KEY,
-	stagger_time: 1000,
-	encode_polylines: false,
-	secure: true,
-});
 
 class YahooWeather extends EventEmitter {
 
@@ -40,24 +32,6 @@ class YahooWeather extends EventEmitter {
 		};
 	}
 
-	_reverseGeoLocation(lat, lon) {
-		return new Promise((resolve, reject) => {
-			googleMapsAPI.reverseGeocode({
-				latlng: `${lat},${lon}`,
-				result_type: 'locality',
-				language: 'en',
-				location_type: 'APPROXIMATE',
-			}, (err, data) => {
-				if (!err && data && data.results.length > 0) {
-					this.reverseGeoLocation = data.results[0].address_components[0].long_name;
-					resolve(data.results[0].address_components[0].long_name);
-				} else {
-					reject();
-				}
-			});
-		});
-	}
-
 	_queryYahooAPI(weatherYQL) {
 
 		// Make request to fetch weather information from yahoo
@@ -70,7 +44,7 @@ class YahooWeather extends EventEmitter {
 		return yahooConditions[(code === '3200') ? 48 : code];
 	}
 
-	fetchData(polling) {
+	fetchData() {
 
 		// Return promise
 		return new Promise((resolve, reject) => {
@@ -79,23 +53,8 @@ class YahooWeather extends EventEmitter {
 				// If lat long provided, do reverse geocoding
 				if (this.latitude && this.longitude) {
 
-					if (polling) {
-						if (!this.reverseGeoLocation) {
-
-							// Do reverse geolocation (lat, lng to location name)
-							this._reverseGeoLocation(this.latitude, this.longitude)
-								.then((location) => locationResolve(location))
-								.catch(err => reject('google'));
-						} else {
-							resolve(this.reverseGeoLocation);
-						}
-					} else {
-
-						// Do reverse geolocation (lat, lng to location name)
-						this._reverseGeoLocation(this.latitude, this.longitude)
-							.then((location) => locationResolve(location))
-							.catch(err => reject('google'));
-					}
+					// Resolve with lat lng object found in speech
+					locationResolve(`(${this.latitude},${this.longitude})`);
 				} else {
 
 					// Resolve with location object found in speech
@@ -138,8 +97,11 @@ class YahooWeather extends EventEmitter {
 						this._queryYahooAPI(`https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(this.queries(location).forecast)}&format=json`)
 							.then((data2) => {
 
-								// Resolve with data
-								resolve(JSON.parse(data2).query.results.channel);
+								if (JSON.parse(data2).query.results) {
+
+									// Resolve with data
+									resolve(JSON.parse(data2).query.results.channel);
+								} else reject('no_info_location');
 							})
 							.catch((err) => {
 								// Reject
@@ -174,8 +136,11 @@ class YahooWeather extends EventEmitter {
 						this._queryYahooAPI(`https://query.yahooapis.com/v1/public/yql?q=${encodeURIComponent(this.queries(location).current)}&format=json`)
 							.then((data2) => {
 
-								// Resolve with data
-								resolve(JSON.parse(data2).query.results.channel);
+								if (JSON.parse(data2).query.results) {
+
+									// Resolve with data
+									resolve(JSON.parse(data2).query.results.channel);
+								} else reject('no_info_location');
 							})
 							.catch((err) => {
 
@@ -241,7 +206,7 @@ class YahooWeather extends EventEmitter {
 		// Refresh data every 60 seconds
 		setInterval(() => {
 
-			this.fetchData(true).then((data) => {
+			this.fetchData().then((data) => {
 
 				// Construct updated data set
 				const newData = {

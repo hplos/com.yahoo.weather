@@ -225,7 +225,10 @@ function listenForSpeechEvents(locationPromise) {
 
 				console.log('Yahoo Weather: prepare response done');
 
-			}).catch(err => console.log(err));
+			}).catch(err => {
+				console.log('Error fetching weather data: ', err);
+				clearTimeout(timeout);
+			});
 		}
 	});
 }
@@ -370,16 +373,20 @@ function fetchWeatherData(locationPromise, speech, options) {
 
 					// Handle unknown location
 					if (err && (err.message === 'converting location to woeid' || err.message === 'no data')) {
+						options.abort = true;
 						say(__('general.no_data_on_location'), {}, speech);
-					} else if (err === 'google') {
-						speech.say(__('general.google_api_error'));
+					} else if (err === 'no_info_location') {
+						options.abort = true;
+						speech.say(__('general.no_data_on_location'));
 					} else {
+						options.abort = true;
 						say(__('general.error'), {}, speech);
 					}
 
 					reject(err);
 				});
 			} else {
+				options.abort = true;
 				say(__('general.error'), {}, speech);
 			}
 		});
