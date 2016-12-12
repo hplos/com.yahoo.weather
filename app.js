@@ -1,5 +1,7 @@
 'use strict';
 
+const Log = require('homey-log').Log;
+
 const YahooWeather = require('./node-yahoo-weather');
 const moment = require('moment');
 let defaultLocation = {
