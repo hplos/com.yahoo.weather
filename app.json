@@ -332,5 +332,19 @@
         ]
       }
     }
-  ]
+  ],
+  "speechExamples": {
+    "en": [
+      "What is the current outside temperature?",
+      "What is the weather for tomorrow?",
+      "What will the weather be in Amsterdam this friday?",
+      "What is the current temperature in Casablanca?"
+    ],
+    "nl": [
+      "Hoe warm is het buiten?",
+      "Hoe is het weer morgen?",
+      "Hoe is het weer in Parijs aankomende vrijdag?",
+      "Hoe warm is het in Casablanca?"
+    ]
+  }
 }
