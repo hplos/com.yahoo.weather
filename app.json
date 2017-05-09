@@ -238,101 +238,46 @@
       }
     ]
   },
-  "speech": [
-    {
-      "id": "weather",
-      "importance": 1,
-      "triggers": {
-        "en": [
-          "weather"
-        ],
-        "nl": [
-          "weer"
-        ]
+  "speech": {
+    "en": {
+      "element": {
+        "weatherReg": {
+          "type": "regex",
+          "value": "(the\\s)?weather"
+        },
+        "temperatureReg": {
+          "type": "regex",
+          "value": "((the\\s)?temperature|how\\s(hot|warm|cold))"
+        }
+      },
+      "group": {
+        "weatherRequest": {
+          "set": "weatherReg && (LOCATION) && (TIME)",
+          "ordered": false,
+          "allowDisconnect": true,
+          "capturingGroup": true
+        },
+        "temperatureRequest": {
+          "set": "temperatureReg && (LOCATION) && (TIME)",
+          "ordered": false,
+          "allowDisconnect": true,
+          "capturingGroup": true
+        }
       }
     },
-    {
-      "id": "temperature",
-      "importance": 0.65,
-      "triggers": {
-        "en": [
-          "temperature",
-          "hot",
-          "warm",
-          "cold"
-        ],
-        "nl": [
-          "temperatuur",
-          "warm",
-          "koud"
-        ]
-      }
-    },
-    {
-      "id": "will",
-      "importance": 0.3,
-      "triggers": {
-        "en": [
-          "will",
-          "be",
-          "going",
-          "expected"
-        ],
-        "nl": [
-          "wordt",
-          "word",
-          "verwacht",
-          "verwachtte"
-        ]
-      }
-    },
-    {
-      "id": "outside",
-      "importance": 0.3,
-      "triggers": {
-        "en": [
-          "outside",
-          "outdoor",
-          "outdoors",
-          "outer"
-        ],
-        "nl": [
-          "buiten"
-        ]
-      }
-    },
-    {
-      "id": "current",
-      "importance": 0.3,
-      "triggers": {
-        "en": [
-          "current",
-          "present",
-          "right now",
-          "moment"
-        ],
-        "nl": [
-          "huidige",
-          "momenteel",
-          "actueel",
-          "acutele",
-          "nu"
-        ]
-      }
-    },
-    {
-      "id": "in",
-      "importance": 0.3,
-      "triggers": {
-        "en": [
-          "in"
-        ],
-        "nl": [
-          "in"
-        ]
+    "nl": {
+      "element": {
+        "weatherReg": {
+          "type": "regex",
+          "value": "(weer\\swordt?\\shet|(wordt?|is)\\shet\\s(goed\\s|mooi\\s|lekker\\s|slecht\\s|fijn\\s)?weer)"
+        },
+        "temperatureReg": {
+          "type": "regex",
+          "value": "((de\\s)?temperatuur|hoe\\s(warm|heet|koud|koel)\\s(wordt?|gaat|zal)\\shet)"
+        }
       }
     }
-  ],
+  },
   "speechExamples": {
     "en": [
       "What is the current outside temperature?",
