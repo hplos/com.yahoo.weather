@@ -177,19 +177,24 @@ function listenForSpeechEvents(locationPromise) {
 	console.log('Yahoo Weather: start listening for speech events...');
 
 	// Listen on speech input
-	Homey.manager('speech-input').on('speech', speech => {
+	Homey.manager('speech-input').on('speech', (speech, callback) => {
+		callback(null, true);
+	})
+
+	// Listen on winning speech input
+	Homey.manager('speech-input').on('speechMatch', speech => {
 
 		console.log('Yahoo Weather: incoming speech event');
 		console.log(speech);
-		console.log(speech.time);
+		console.log(speech.times);
 
 		// Create options object for creating response
 		const options = {
-			weatherTrigger: false,
-			temperatureTrigger: false,
+			weatherRequest: false,
+			temperatureRequest: false,
 			date: 'current',
 			language: language,
-			dateTranscript: (language === 'en') ? 'today' : 'vandaag',
+			dateTranscript: __('general.current')
 		};
 
 		// Say something to indicate processing
@@ -206,10 +211,11 @@ function listenForSpeechEvents(locationPromise) {
 		}, 10000);
 
 		// Parse speech triggers to options
-		if (!options.abort) parseSpeechTriggers(speech, options);
-
-		// Parse time object from speech to options
-		if (!options.abort) parseSpeechTime(speech, options);
+		if (!options.abort) {
+			parseSpeech(speech, options);
+		} else {
+			clearTimeout(timeout);
+		}
 
 		console.log('Yahoo Weather: parsing speech object done, fetching weather data information...');
 
@@ -231,6 +237,8 @@ function listenForSpeechEvents(locationPromise) {
 				console.log('Error fetching weather data: ', err);
 				clearTimeout(timeout);
 			});
+		} else {
+			clearTimeout(timeout);
 		}
 	});
 }
@@ -242,49 +250,18 @@ function listenForSpeechEvents(locationPromise) {
  * @param speech
  * @param options
  */
-function parseSpeechTriggers(speech, options) {
+function parseSpeech(speech, options) {
 
-	// Process triggers found
-	speech.triggers.forEach(trigger => {
-		switch (trigger.id) {
-			case 'weather':
-				options.weatherTrigger = true;
-				break;
-			case 'current':
-				options.date = 'current';
-				options.dateTranscript = (options.language === 'en') ? 'current' : 'op het moment';
-				break;
-			case 'will':
-				options.date = 'today';
-				options.dateTranscript = (options.language === 'en') ? 'today' : 'vandaag';
-				break;
-			case 'in':
-				// Parse transcript for text after "in"
-				const textAfterIn = speech.transcript.substring(trigger.position + 3).trim();
+	//set options based on speech info
+	const requestType = (speech.matches.weatherRequest) ? 'weatherRequest' : 'temperatureRequest';
+	options[requestType] = true;
 
-				// Check if time detected
-				if (speech.time && speech.time[0].transcript) {
+	//store location if present
+	if (speech.matches[requestType].LOCATION) 
+		options.location = speech.matches[requestType].LOCATION;
 
-					// Check if text after "in" is not a measure of time
-					if (textAfterIn.indexOf((speech.time[0].transcript)) === -1
-						&& speech.time[0].transcript.indexOf(textAfterIn) === -1) {
-
-						// No time, must be location, set location
-						options.location = (textAfterIn || undefined);
-					}
-				} else {
-					// No time, must be location, set location
-					options.location = (textAfterIn || undefined);
-				}
-
-				break;
-			case 'temperature':
-				options.temperatureTrigger = true;
-				break;
-			default:
-				break;
-		}
-	});
+	//parse time
+	parseSpeechTime(speech, options);
 }
 
 /**
@@ -296,37 +273,38 @@ function parseSpeechTriggers(speech, options) {
  */
 function parseSpeechTime(speech, options) {
 
-	// If time triggers is recognized
-	if (speech.time) {
+	// Multiple times
+	if (speech.times.length > 1) {
 
-		// Indicate that a date has been found
-		options.date = true;
+		// Let user know this cant be handled yet
+		say(__('general.confused'), {}, speech);
 
-		// Multiple triggers
-		if (speech.time.length > 1) {
+		options.abort = true;
+	} else if (speech.times.length > 0) {
+
+		// Parse data in usable date
+		if (speech.times[0].time.future ) {
+
+			options.date = moment(speech.times[0].time.future).format('DD MMM YYYY');
+			options.dateTranscript = speech.times[0].transcript;
+
+			// Check if the parsed date is today, then use today mode
+			if (options.date === moment().format('DD MMM YYYY')) {
+				options.date = 'today';
+				options.dateTranscript = __('general.today');
+			}
+		} else if (speech.times[0].time.past && moment(speech.times[0].time.past).format('DD MMM YYYY') === moment().format('DD MMM YYYY') ) {
+			//today
+
+				options.date = 'today';
+				options.dateTranscript = __('general.today');
+		} else {
+			//in the past
 
 			// Let user know this cant be handled yet
 			say(__('general.confused'), {}, speech);
 
 			options.abort = true;
-		} else if (speech.time.length > 0) {
-
-			// Single trigger
-			const day = speech.time[0].time.day;
-			const month = speech.time[0].time.month + 1;
-			const year = speech.time[0].time.year || moment().year();
-
-			// Parse data in usable date
-			if (day && month && year) {
-				options.date = moment(`${day}:${month}:${year}`, 'D:M:YYYY').format('DD MMM YYYY');
-				options.dateTranscript = speech.time[0].transcript;
-
-				// Check if the parsed date is today, then use today mode
-				if (options.date === moment().format('DD MMM YYYY')) {
-					options.date = 'today';
-					options.dateTranscript = __('general.today');
-				}
-			}
 		}
 	}
 }
@@ -440,124 +418,63 @@ function prepareResponse(speech, options, data) {
 function createResponse(options, data) {
 	console.log('Yahoo Weather: creating response...');
 
-	options.locationFirst = (Math.round(Math.random()) === 1 && options.location);
+	if (options.weatherRequest) {
 
-	// Determine form to use for sentence (noun/adjective)
-	let form;
-
-	// Check for incoming data
-	if (options.weatherTrigger) {
-
-		// Check whether adjective or noun is present
+		//add some variation to the responses
+		let form;
+		
+		// Check whether adjective is present
 		if (data.text.adjective && data.text.adjective[options.language]
 			&& data.text.noun && data.text.noun[options.language]) {
-			const random = Math.round(Math.random());
-			if (random === 1) form = 'adjective';
-			else form = 'noun';
+			
+			form = (Math.round(Math.random()) === 1) ? 'adjective' : 'noun';
 		} else if (data.text.adjective && data.text.adjective[options.language]) {
 			form = 'adjective';
-		} else if (data.text.noun && data.text.noun[options.language]) {
+		} else {
 			form = 'noun';
 		}
 
-		// Determine plural of singular prefix
-		const prefix = (data.text[form].plural) ? 'are' : 'is';
-
-		// Check if asked for forecast or current data
-		if (options.date === 'current') {
-
-			// Create sentence
-			if (form === 'noun') {
-				if (options.locationFirst) {
-					return __('weather.current.noun.location_first', {
-						prefix: prefix,
-						weather: data.text[form][options.language],
-						moment: options.dateTranscript,
-						temperature: data.temperature,
-					});
-				}
-				return __('weather.current.noun.location_last', {
-					prefix: prefix,
-					weather: data.text[form][options.language],
-					moment: options.dateTranscript,
-					temperature: data.temperature,
-				});
-			}
-			if (options.locationFirst) {
-				return __('weather.current.adjective.location_first', {
-					weather: data.text[form][options.language],
-					moment: options.dateTranscript,
-					temperature: data.temperature,
-				});
-			}
-			return __('weather.current.adjective.location_last', {
-				weather: data.text[form][options.language],
-				moment: options.dateTranscript,
-				temperature: data.temperature,
-			});
-		}
-
-		// Create sentence
-		if (form === 'noun') {
-			if (options.locationFirst) {
-				return __('weather.date.noun.location_first', {
-					prefix: prefix,
-					weather: data.text[form][options.language],
-					moment: options.dateTranscript,
-					low: data.low,
-					high: data.high,
-				});
-			}
-			return __('weather.date.noun.location_last', {
-				prefix: prefix,
-				weather: data.text[form][options.language],
-				moment: options.dateTranscript,
-				low: data.low,
-				high: data.high,
-			});
-		}
-		if (options.locationFirst) {
-			return __('weather.date.adjective.location_first', {
-				prefix: prefix,
-				weather: data.text[form][options.language],
-				moment: options.dateTranscript,
-				low: data.low,
-				high: data.high,
-			});
-		}
-		return __('weather.date.adjective.location_last', {
-			prefix: prefix,
+		const responseProperties = {
 			weather: data.text[form][options.language],
 			moment: options.dateTranscript,
-			low: data.low,
-			high: data.high,
-		});
-	} else if (options.temperatureTrigger) {
-		const prefix = (options.date === 'today') ? __('general.ranges') : __('general.will_range');
+			location: (options.location) ? ` ${__('general.in')} ${options.location}` : ""
+		}
+		
+		// Check if asked for forecast or right now
+		if (options.date === 'current') {
+
+			responseProperties.prefix = (data.text[form].plural) ? __('general.are') : __('general.is');
+			responseProperties.temperature = data.temperature;
+
+			return __(`weather.current.${form}`, responseProperties);
+		} else{
+			// Create sentence for today or date
+
+			responseProperties.prefix = (data.text[form].plural) ? __('general.will_plural') : __('general.will_singular');
+			responseProperties.low = data.low;
+			responseProperties.high = data.high;
+
+			return __(`weather.date.${form}`, responseProperties);
+		}
+
+	} else if (options.temperatureRequest) {
 
 		if (options.date === 'current') {
-			if (options.locationFirst) {
-				return __('temperature.current.location_first', { temperature: data.temperature });
-			}
-			return __('temperature.current.location_last', { temperature: data.temperature });
-		}
 
-		if (options.locationFirst) {
-			return __('temperature.date.location_first', {
-				prefix: prefix,
+			return __('temperature.current', { 
+				temperature: data.temperature,
+				location: (options.location) ? ` ${__('general.in')} ${options.location}` : "",
+			});
+		} else {
+
+			return __('temperature.date', {
+				prefix: (options.date === 'today') ? __('general.ranges') : __('general.will_range'),
+				moment: options.dateTranscript,
+				location: (options.location) ? ` ${__('general.in')} ${options.location}` : "",
 				low: data.low,
 				high: data.high,
-				moment: options.dateTranscript,
 			});
 		}
-
-		return __('temperature.date.location_last', {
-			prefix: prefix,
-			low: data.low,
-			high: data.high,
-			moment: options.dateTranscript,
-		});
-
 	}
 
 	return __('general.no_forecast');
@@ -572,23 +489,11 @@ function createResponse(options, data) {
  * @param speech
  */
 function say(text, options, speech) {
-	let result;
 
-	// Append location if desired
-	if (options && options.location) {
-		if (options.locationFirst) {
-			result = `In ${options.location} ${text}`;
-		} else {
-			result = `${text} in ${options.location}`;
-		}
-	} else {
-		result = text;
-	}
-
-	console.log(`Yahoo Weather: let Homey say: ${result}`);
+	console.log(`Yahoo Weather: let Homey say: ${text}`);
 
 	// Make Homey talk!
-	speech.say(result);
+	speech.say(text);
 }
 
 /**

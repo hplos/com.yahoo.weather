@@ -8,40 +8,28 @@
     "will_range": "zal de temperatuur oplopen",
     "wait1": "Een momentje",
     "wait2": "Een ogenblikje",
+    "current": "op dit moment",
     "today": "vandaag",
     "yahoo_timeout": "Sorry, de yahoo weer service reageert niet, probeer het later nog eens",
-    "google_api_error": "Sorry, de Google Maps service reageert niet, probeer het later nog eens"
+    "google_api_error": "Sorry, de Google Maps service reageert niet, probeer het later nog eens",
+    "are": "zijn",
+    "is": "is",
+    "in": "in",
+    "will_singular": "wordt",
+    "will_plural": "worden"
   },
   "weather": {
     "current": {
-      "noun": {
-        "location_first": "is er __weather__ op het moment, en de temperatuur is __temperature__ graden Celsius",
-        "location_last": "Op het moment is er __weather__, en de temperatuur is __temperature__ graden Celsius"
-      },
-      "adjective": {
-        "location_first": "wordt het __moment__ een __weather__ dag, en de temperatuur wordt __temperature__ graden Celsius",
-        "location_last": "__moment__ wordt een __weather__ dag, en de temperatuur wordt __temperature__ graden Celsius"
-      }
+      "noun": "Er __prefix__ __moment__ __weather____location__, en de temperatuur is __temperature__ graden Celsius",
+      "adjective": "__moment__ is het een __weather__ dag__location__, en de temperatuur wordt __temperature__ graden Celsius"
     },
     "date": {
-      "noun": {
-        "location_first": "wordt er __moment__ __weather__ verwacht, de temperatuur loopt op van __low__ tot __high__ graden Celsius",
-        "location_last": "__moment__ wordt er __weather__ verwacht, de temperatuur loopt op van __low__ tot __high__ graden Celsius"
-      },
-      "adjective": {
-        "location_first": "wordt het een __weather__ dag __moment__, en de temperatuur loopt op van __low__ tot __high__ graden Celsius",
-        "location_last": "__moment__ wordt een __weather__ dag, en de temperatuur loopt op van __low__ tot __high__ graden Celsius"
-      }
+      "noun": "__moment__ __prefix__ er __weather__ verwacht__location__, de temperatuur varieert van __low__ tot __high__ graden Celsius",
+      "adjective": "__moment__ wordt een __weather__ dag__location__, en de temperatuur varieert van __low__ tot __high__ graden Celsius"
     }
   },
   "temperature": {
-    "current": {
-      "location_first": "is de huidige temperatuur __temperature__ graden Celsius",
-      "location_last": "de huidige temperatuur is __temperature__ graden Celsius"
-    },
-    "date": {
-      "location_first": "__prefix__ van __low__ tot __high__ graden Celsius",
-      "location_last": "__moment__ __prefix__ van __low__ tot __high__ graden Celsius"
-    }
+    "current": "de huidige temperatuur__location__ is __temperature__ graden Celsius",
+    "date": "__moment__ __prefix__ van __low__ tot __high__ graden Celsius__location__"
   }
 }

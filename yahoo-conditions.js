@@ -187,8 +187,8 @@ module.exports = [
 			adjective: undefined,
 			noun: {
 				nl: 'sneeuw vlagen',
-				en: 'snow flurry',
-				plural: false,
+				en: 'snow flurries',
+				plural: true,
 			},
 		},
 	},
@@ -202,7 +202,7 @@ module.exports = [
 				en: 'snowy',
 			},
 			noun: {
-				nl: 'sneeuw',
+				nl: 'lichte sneeuwbuien',
 				en: 'snow showers',
 				plural: true,
 			},
@@ -215,7 +215,7 @@ module.exports = [
 		text: {
 			adjective: undefined,
 			noun: {
-				nl: 'sneeuwbuien',
+				nl: 'rondwaaiende sneeuw',
 				en: 'blowing snow',
 				plural: false,
 			},
@@ -231,7 +231,7 @@ module.exports = [
 				en: 'snowy',
 			},
 			noun: {
-				nl: 'snow',
+				nl: 'sneeuw',
 				en: 'snow',
 				plural: false,
 			},
@@ -304,11 +304,11 @@ module.exports = [
 		quantity: undefined,
 		text: {
 			adjective: {
-				nl: 'mistige',
+				nl: 'vervuilde',
 				en: 'hazy',
 			},
 			noun: {
-				nl: 'mist',
+				nl: 'luchtvervuiling',
 				en: 'haze',
 				plural: false,
 			},
@@ -385,7 +385,7 @@ module.exports = [
 				en: 'cloudy',
 			},
 			noun: {
-				nl: 'bewolking',
+				nl: 'wolken',
 				en: 'clouds',
 				plural: true,
 			},
@@ -401,7 +401,7 @@ module.exports = [
 				en: 'mostly cloudy',
 			},
 			noun: {
-				nl: 'veel bewolking',
+				nl: 'veel wolken',
 				en: 'quite some clouds',
 				plural: true,
 			},
@@ -417,7 +417,7 @@ module.exports = [
 				en: 'mostly cloudy',
 			},
 			noun: {
-				nl: 'veel bewolking',
+				nl: 'veel wolken',
 				en: 'quite some clouds',
 				plural: true,
 			},
@@ -434,8 +434,8 @@ module.exports = [
 			},
 			noun: {
 				nl: 'lichte bewolking',
-				en: 'some clouds',
-				plural: true,
+				en: 'some cloud cover',
+				plural: false,
 			},
 		},
 	},
@@ -450,8 +450,8 @@ module.exports = [
 			},
 			noun: {
 				nl: 'lichte bewolking',
-				en: 'some clouds',
-				plural: true,
+				en: 'some cloud cover',
+				plural: false,
 			},
 		},
 	},
@@ -498,7 +498,7 @@ module.exports = [
 			},
 			noun: {
 				nl: 'mooi',
-				en: undefined,
+				en: 'fair',
 				plural: false,
 			},
 		},
@@ -514,7 +514,7 @@ module.exports = [
 			},
 			noun: {
 				nl: 'mooi',
-				en: undefined,
+				en: 'fair',
 				plural: false,
 			},
 		},
@@ -555,7 +555,7 @@ module.exports = [
 		text: {
 			adjective: undefined,
 			noun: {
-				nl: 'zwaar onweer',
+				nl: 'zware onweersbuien',
 				en: 'thunderstorms',
 				plural: true,
 			},
@@ -568,7 +568,7 @@ module.exports = [
 		text: {
 			adjective: undefined,
 			noun: {
-				nl: 'zwaar onweer',
+				nl: 'zware onweersbuien',
 				en: 'thunderstorms',
 				plural: true,
 			},
@@ -581,7 +581,7 @@ module.exports = [
 		text: {
 			adjective: undefined,
 			noun: {
-				nl: 'zwaar onweer',
+				nl: 'zware onweersbuien',
 				en: 'thunderstorms',
 				plural: true,
 			},
@@ -609,11 +609,11 @@ module.exports = [
 		quantity: 'heavy',
 		text: {
 			adjective: {
-				nl: 'sneeuwachtige',
-				en: 'snowy',
+				nl: 'erg sneeuwachtige',
+				en: 'very snowy',
 			},
 			noun: {
-				nl: 'zware sneeuwbuien',
+				nl: 'zware sneeuwval',
 				en: 'heavy snow',
 				plural: false,
 			},
@@ -629,7 +629,7 @@ module.exports = [
 				en: 'snowy',
 			},
 			noun: {
-				nl: 'sneeuwbuien',
+				nl: 'sneeuw',
 				en: 'snow',
 				plural: false,
 			},
@@ -641,11 +641,11 @@ module.exports = [
 		quantity: 'heavy',
 		text: {
 			adjective: {
-				nl: 'sneeuwachtige',
-				en: 'snowy',
+				nl: 'erg sneeuwachtige',
+				en: 'very snowy',
 			},
 			noun: {
-				nl: 'zware sneeuwbuien',
+				nl: 'zware sneeuwval',
 				en: 'heavy snow',
 				plural: false,
 			},
@@ -657,11 +657,11 @@ module.exports = [
 		quantity: 'partly',
 		text: {
 			adjective: {
-				nl: 'matig bewolkte',
+				nl: 'deels bewolkte',
 				en: 'partially cloudy',
 			},
 			noun: {
-				nl: 'matige bewolking',
+				nl: 'verspreide wolken',
 				en: 'some clouds',
 				plural: true,
 			},
