@@ -24,8 +24,8 @@
       "adjective": "__moment__ is het een __weather__ dag__location__, en de temperatuur wordt __temperature__ graden Celsius"
     },
     "date": {
-      "noun": "__moment__ __prefix__ er __weather__ verwacht__location__, de temperatuur varieert op van __low__ tot __high__ graden Celsius",
-      "adjective": "__moment__ wordt een __weather__ dag__location__, en de temperatuur varieert op van __low__ tot __high__ graden Celsius"
+      "noun": "__moment__ __prefix__ er __weather__ verwacht__location__, de temperatuur varieert van __low__ tot __high__ graden Celsius",
+      "adjective": "__moment__ wordt een __weather__ dag__location__, en de temperatuur varieert van __low__ tot __high__ graden Celsius"
     }
   },
   "temperature": {
