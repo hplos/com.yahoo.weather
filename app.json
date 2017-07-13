@@ -273,7 +273,7 @@
         },
         "temperatureReg": {
           "type": "regex",
-          "value": "((de\\s)?temperatuur|(hoe\\s(warm|heet|koud|koel)|hoeveel\\sgraden)\\s(wordt?|gaat|zal|is)\\shet)"
+          "value": "((de\\s(huidige\\s)?)?temperatuur|(hoe\\s(warm|heet|koud|koel)|hoeveel\\sgraden)\\s(wordt?|gaat|zal|is)\\shet|is\\shet\\s(warm|heet|koud|koel))"
         }
       }
     }
