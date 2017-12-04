@@ -179,10 +179,9 @@ function listenForSpeechEvents(locationPromise) {
 	// Listen on speech input
 	Homey.manager('speech-input').on('speech', (speech, callback) => {
 		if (speech.allZones && speech.allZones.length > 0) {
-			callback("user is asking about a zone, not a location");
-		} else {
-			callback(null, true);
+			return callback(new Error("user is asking about a zone, not a location"));
 		}
+		return callback(null, true);
 	})
 
 	// Listen on winning speech input
