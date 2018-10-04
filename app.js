@@ -162,8 +162,25 @@ function listenForWeatherChanges(locationPromise) {
 					callback(true, false);
 				}
 			});
+    		Homey.manager('flow').on('condition.temperature', temperature);
+				Homey.manager('flow').on('condition.wind_speed', windspeed);
 		}
 	});
+}
+
+function temperature(callback, args) {
+	console.log('temp check!');
+            if (temperature > args.variable) {
+                callback(null, true);
+            }
+            else callback(null, false);
+}
+function windspeed(callback, args) {
+	console.log('winspeed check!');
+            if (windspeed > args.variable) {
+                callback(null, true);
+            }
+            else callback(null, false);
 }
 
 /**
@@ -260,7 +277,7 @@ function parseSpeech(speech, options) {
 	options[requestType] = true;
 
 	//store location if present
-	if (speech.matches[requestType].LOCATION) 
+	if (speech.matches[requestType].LOCATION)
 		options.location = speech.matches[requestType].LOCATION;
 
 	//parse time
@@ -425,11 +442,11 @@ function createResponse(options, data) {
 
 		//add some variation to the responses
 		let form;
-		
+
 		// Check whether adjective is present
 		if (data.text.adjective && data.text.adjective[options.language]
 			&& data.text.noun && data.text.noun[options.language]) {
-			
+
 			form = (Math.round(Math.random()) === 1) ? 'adjective' : 'noun';
 		} else if (data.text.adjective && data.text.adjective[options.language]) {
 			form = 'adjective';
@@ -442,7 +459,7 @@ function createResponse(options, data) {
 			moment: options.dateTranscript,
 			location: (options.location) ? ` ${__('general.in')} ${options.location}` : ""
 		}
-		
+
 		// Check if asked for forecast or right now
 		if (options.date === 'current') {
 
@@ -464,7 +481,7 @@ function createResponse(options, data) {
 
 		if (options.date === 'current') {
 
-			return __('temperature.current', { 
+			return __('temperature.current', {
 				temperature: data.temperature,
 				location: (options.location) ? ` ${__('general.in')} ${options.location}` : "",
 			});

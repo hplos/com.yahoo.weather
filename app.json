@@ -228,6 +228,32 @@
             ]
           }
         ]
+      },
+      {
+        "id": "temperature",
+        "title": {
+          "en": "Temperature is !{{is|is not}} above",
+          "nl": "Temperatuur is !{{is|is niet}} hoger dan"
+        },
+        "args": [
+          {
+            "name": "temperature",
+            "type": "number"
+          }
+        ]
+      },
+      {
+        "id": "wind_speed",
+        "title": {
+          "en": "Wind speed is !{{is|is not}} above",
+          "nl": "Windsnelheid !{{is|is niet}} hoger dan"
+        },
+        "args": [
+          {
+            "name": "kph",
+            "type": "number"
+          }
+        ]
       }
     ]
   },
